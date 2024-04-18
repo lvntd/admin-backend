@@ -2,31 +2,45 @@ const { validationResult } = require('express-validator')
 const Client = require('../models/client')
 
 exports.addClient = (req, res, next) => {
-  const result = validationResult(req)
-
-  if (!result.isEmpty()) {
-    return res.status(400).json({ message: result })
+  const errors = validationResult(req)
+  if (!errors.isEmpty()) {
+    return res
+      .status(400)
+      .json({ message: 'Validation failed', errors: errors.array() })
   }
 
-  const name = req.body.name
-  const taxId = req.body.taxId
-  const vatPayer = req.body.vatPayer
-  const logoUrl = req.body.logoUrl
+  const { name, taxId, vatPayer, logoUrl } = req.body
 
-  const client = new Client({
-    name,
-    taxId,
-    vatPayer,
-    logoUrl,
-  })
+  Client.findOne({ taxId })
+    .then((existingClient) => {
+      if (existingClient) {
+        res.status(400).json({ message: 'Tax ID already exists' })
+        return null // This will stop the promise chain.
+      }
 
-  client
-    .save()
-    .then((result) => {
-      res.status(200).json({ message: 'Client created', data: result })
+      const newClient = new Client({
+        name,
+        taxId,
+        vatPayer,
+        logoUrl,
+      })
+
+      return newClient.save()
+    })
+    .then((client) => {
+      if (client) {
+        // Ensure client is not null (stopped promise chain will result in client being null)
+        res
+          .status(201)
+          .json({ message: 'Client created successfully', data: client })
+      }
     })
     .catch((err) => {
-      res.status(500).json({ message: 'Client was not created', error: err })
+      // Check to ensure no response has been sent
+      if (!res.headersSent) {
+        console.error(err)
+        res.status(500).json({ message: 'Failed to create client', error: err })
+      }
     })
 }
 
