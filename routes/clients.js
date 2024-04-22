@@ -1,4 +1,5 @@
-const { check, body, checkSchema, query, param } = require('express-validator')
+const { checkSchema, param } = require('express-validator')
+const Client = require('../models/client')
 
 const express = require('express')
 
@@ -13,17 +14,35 @@ const clientSchema = {
       options: { min: 3, max: 50 },
       errorMessage: 'Name must be between 3 and 50 symbols',
     },
+    trim: true, // Sanitizing inputs
+    escape: true,
   },
   taxId: {
-    errorMessage: 'Name is required',
+    errorMessage: 'Tax ID is required',
     isLength: {
       options: { min: 9, max: 11 },
       errorMessage: 'Name must be between 9 and 11 symbols',
     },
+    isAlphanumeric: {
+      errorMessage: 'Tax ID must contain only letters and numbers',
+    },
+    trim: true, // Removes leading and trailing spaces
+    escape: true, // Escapes HTML entities
+    // CUSTOM ASYNC VALIDATION: Check if id already exists
+    custom: {
+      options: (value) => {
+        return Client.findOne({ taxId: value }).then((existingClient) => {
+          if (existingClient) {
+            return Promise.reject('This id already exists')
+          }
+        })
+      },
+    },
   },
   vatPayer: {
-    errorMessage: 'vatPayer must be boolean',
+    errorMessage: 'Va Payer must be boolean',
     isBoolean: true,
+    toBoolean: true, // Sanitize and convert to Boolean
   },
 }
 
@@ -39,7 +58,7 @@ router.put(
 
 router.delete(
   '/:clientId',
-  param('clientId', ':clientId is required variable in path').notEmpty(),
+  param('clientId', 'clientId is required variable in path').notEmpty(),
   clientsController.deleteClient,
 )
 

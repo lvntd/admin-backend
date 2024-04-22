@@ -5,28 +5,21 @@ exports.addClient = (req, res, next) => {
   const errors = validationResult(req)
   if (!errors.isEmpty()) {
     return res
-      .status(400)
+      .status(422)
       .json({ message: 'Validation failed', errors: errors.array() })
   }
 
   const { name, taxId, vatPayer, logoUrl } = req.body
 
-  Client.findOne({ taxId })
-    .then((existingClient) => {
-      if (existingClient) {
-        res.status(400).json({ message: 'Tax ID already exists' })
-        return null // This will stop the promise chain.
-      }
+  const newClient = new Client({
+    name,
+    taxId,
+    vatPayer,
+    logoUrl,
+  })
 
-      const newClient = new Client({
-        name,
-        taxId,
-        vatPayer,
-        logoUrl,
-      })
-
-      return newClient.save()
-    })
+  newClient
+    .save()
     .then((client) => {
       if (client) {
         // Ensure client is not null (stopped promise chain will result in client being null)
