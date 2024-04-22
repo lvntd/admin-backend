@@ -31,8 +31,9 @@ exports.addClient = (req, res, next) => {
     .catch((err) => {
       // Check to ensure no response has been sent
       if (!res.headersSent) {
-        console.error(err)
-        res.status(500).json({ message: 'Failed to create client', error: err })
+        const error = new Error(err)
+        error.message = 'Could not create client'
+        return next(error)
       }
     })
 }
@@ -45,10 +46,8 @@ exports.editClient = (req, res, next) => {
   }
 
   const clientId = req.params.clientId
-  const name = req.body.name
-  const taxId = req.body.taxId
-  const vatPayer = req.body.vatPayer
-  const logoUrl = req.body.logoUrl
+
+  const { name, taxId, vatPayer, logoUrl } = req.body
 
   Client.findById(clientId)
     .then((client) => {
@@ -63,9 +62,11 @@ exports.editClient = (req, res, next) => {
         res.status(200).json({ message: 'Client was updated' })
       })
     })
-    .catch((err) =>
-      res.status(500).json({ message: 'Error: Client was not updated' }),
-    )
+    .catch((err) => {
+      const error = new Error(err)
+      error.message = `Could not update client: ${clientId}`
+      return next(error)
+    })
 }
 
 exports.getClients = (req, res, next) => {
@@ -85,7 +86,11 @@ exports.getClients = (req, res, next) => {
     .then((clients) => {
       res.status(200).json({ message: 'Success', data: clients })
     })
-    .catch((err) => res.status(500).json({ message: 'Error' }))
+    .catch((err) => {
+      const error = new Error(err)
+      error.message = 'Could not get clients'
+      return next(error)
+    })
 }
 
 exports.deleteClient = (req, res, next) => {
@@ -97,13 +102,14 @@ exports.deleteClient = (req, res, next) => {
 
   const clientId = req.params.clientId
 
-  console.log({ req })
-  console.log({ clientId })
-
   Client.deleteOne({ _id: clientId })
     .then(() => {
       console.log('DESTROYED PRODUCT')
       res.status(200).json({ message: 'Successfully deleted' })
     })
-    .catch((err) => res.status(500).json({ message: 'Could not delete' }))
+    .catch((err) => {
+      const error = new Error(err)
+      error.message = `Could not delete client ${clientId}`
+      return next(error)
+    })
 }

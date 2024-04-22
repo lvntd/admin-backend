@@ -29,6 +29,10 @@ app.use('/clients', clientRoutes)
 
 app.use(errorController.get404)
 
+app.use((error, _req, res, _next) => {
+  res.status(500).json({ message: error.message })
+})
+
 mongoose
   .connect(MONGODB_URI)
   .then(() => {
