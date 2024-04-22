@@ -5,8 +5,10 @@ const bodyParser = require('body-parser')
 const mongoose = require('mongoose')
 const session = require('express-session')
 const MongoDBStore = require('connect-mongodb-session')(session)
+const cors = require('cors')
 
 const errorController = require('./controllers/error')
+const multer = require('multer')
 
 const MONGODB_URI =
   'mongodb+srv://levanted:CIhduU3HxEC0f4r8@cluster0.hzpvtnv.mongodb.net/?retryWrites=true&w=majority'
@@ -18,10 +20,11 @@ new MongoDBStore({
 })
 
 const clientRoutes = require('./routes/clients')
-
+app.use(cors())
 app.use(bodyParser.urlencoded({ extended: false }))
 // parse application/json
 app.use(bodyParser.json())
+app.use(multer().single('image'))
 
 app.use(express.static(path.join(__dirname, 'public')))
 

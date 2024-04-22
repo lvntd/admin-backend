@@ -21,7 +21,7 @@ const clientSchema = {
     errorMessage: 'Tax ID is required',
     isLength: {
       options: { min: 9, max: 11 },
-      errorMessage: 'Name must be between 9 and 11 symbols',
+      errorMessage: 'Tax ID must be between 9 and 11 symbols',
     },
     isAlphanumeric: {
       errorMessage: 'Tax ID must contain only letters and numbers',
@@ -39,10 +39,9 @@ const clientSchema = {
       },
     },
   },
-  vatPayer: {
-    errorMessage: 'Va Payer must be boolean',
-    isBoolean: true,
-    toBoolean: true, // Sanitize and convert to Boolean
+  active: { isBoolean: { errorMessage: 'active field is required' } },
+  legalForm: {
+    errorMessage: 'Legal form is required',
   },
 }
 

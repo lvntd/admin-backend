@@ -9,13 +9,15 @@ exports.addClient = (req, res, next) => {
       .json({ message: 'Validation failed', errors: errors.array() })
   }
 
-  const { name, taxId, vatPayer, logoUrl } = req.body
+  const { name, taxId, legalForm, active } = req.body
+  const image = req.file
 
   const newClient = new Client({
     name,
     taxId,
-    vatPayer,
-    logoUrl,
+    legalForm,
+    active,
+    createdAt: new Date(),
   })
 
   newClient
@@ -47,7 +49,7 @@ exports.editClient = (req, res, next) => {
 
   const clientId = req.params.clientId
 
-  const { name, taxId, vatPayer, logoUrl } = req.body
+  const { name, taxId, legalForm, image } = req.body
 
   Client.findById(clientId)
     .then((client) => {
@@ -56,8 +58,8 @@ exports.editClient = (req, res, next) => {
       }
       client.name = name
       client.taxId = taxId
-      client.vatPayer = vatPayer
-      client.logoUrl = logoUrl
+      client.legalForm = legalForm
+      client.image = image
       return client.save().then((result) => {
         res.status(200).json({ message: 'Client was updated' })
       })

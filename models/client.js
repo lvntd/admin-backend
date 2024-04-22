@@ -11,14 +11,19 @@ const clientSchema = new Schema({
     type: Number,
     required: true,
   },
-  vatPayer: {
+  legalForm: {
+    type: String,
+    required: true,
+  },
+  active: {
     type: Boolean,
     required: true,
   },
-  logoUrl: {
+  image: {
     type: String,
     required: false,
   },
+  createdAt: { type: Date, required: true },
 })
 
 module.exports = mongoose.model('Client', clientSchema)
