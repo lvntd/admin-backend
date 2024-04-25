@@ -1,9 +1,8 @@
 const { checkSchema, param } = require('express-validator')
-const Client = require('../models/client')
-
+const Client = require('../models/client.model')
 const express = require('express')
-
-const clientsController = require('../controllers/clients')
+const clientsController = require('../controllers/clients.controller')
+const { requireAuth } = require('../middleware/auth.middleware')
 
 const router = express.Router()
 
@@ -45,11 +44,17 @@ const clientSchema = {
   },
 }
 
-router.post('/', checkSchema(clientSchema), clientsController.addClient)
-router.get('/all', clientsController.getClients)
+router.post(
+  '/',
+  requireAuth,
+  checkSchema(clientSchema),
+  clientsController.addClient,
+)
+router.get('/all', requireAuth, clientsController.getClients)
 
 router.put(
   '/:clientId',
+  requireAuth,
   param('clientId', ':clientId is required variable in path').notEmpty(),
   checkSchema(clientSchema),
   clientsController.editClient,
@@ -57,6 +62,7 @@ router.put(
 
 router.delete(
   '/:clientId',
+  requireAuth,
   param('clientId', 'clientId is required variable in path').notEmpty(),
   clientsController.deleteClient,
 )
