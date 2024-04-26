@@ -1,6 +1,8 @@
 const { validationResult } = require('express-validator')
 const Client = require('../models/client.model')
 
+const ITEMS_PER_PAGE = 5
+
 exports.addClient = (req, res, next) => {
   const errors = validationResult(req)
   if (!errors.isEmpty()) {
@@ -78,20 +80,37 @@ exports.getClients = (req, res, next) => {
     return res.status(400).json({ message: result })
   }
 
-  const searchParams = {}
+  const page = Number(req.query.page)
+  const skip = (page - 1) * ITEMS_PER_PAGE
+  let totalItems = 0
 
-  Object.entries(req.query).forEach(([key, value]) => {
-    searchParams[key] = value
-  })
+  Client.find()
+    .count()
+    .then((numProducts) => {
+      totalItems = numProducts
 
-  Client.find(searchParams)
-    .then((clients) => {
-      res.status(200).json({ message: 'Success', data: clients })
-    })
-    .catch((err) => {
-      const error = new Error(err)
-      error.message = 'Could not get clients'
-      return next(error)
+      return Client.find()
+        .skip(skip)
+        .limit(ITEMS_PER_PAGE)
+        .then((clients) => {
+          res.status(200).json({
+            message: 'Success',
+            data: clients,
+            total: totalItems,
+            hasNextPage: ITEMS_PER_PAGE * page < totalItems,
+            hasPreviousPage: page > 1,
+            currentPage: page,
+            nextPage: page + 1,
+            prevPage: page - 1,
+            lastPage: Math.ceil(totalItems / ITEMS_PER_PAGE),
+            perPage: ITEMS_PER_PAGE,
+          })
+        })
+        .catch((err) => {
+          const error = new Error(err)
+          error.message = 'Could not get clients'
+          return next(error)
+        })
     })
 }
 
