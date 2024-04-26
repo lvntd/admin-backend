@@ -60,6 +60,13 @@ router.put(
   clientsController.editClient,
 )
 
+router.get(
+  '/:clientId',
+  requireAuth,
+  param('clientId', 'clientId is required variable in path').notEmpty(),
+  clientsController.getClient,
+)
+
 router.delete(
   '/:clientId',
   requireAuth,

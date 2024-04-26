@@ -22,7 +22,6 @@ exports.signup = async (req, res, next) => {
   try {
     const user = await User.create({ email, password, createdAt: new Date() })
     const token = createToken(user._id)
-    console.log({ token })
 
     res.cookie('accessToken', token, { httpOnly: true, maxAge: maxAge * 1000 })
 
@@ -46,7 +45,6 @@ exports.login = async (req, res, next) => {
     // @ts-ignore
     const user = await User.login(email, password)
     const token = createToken(user._id)
-    console.log({ user })
 
     res.cookie('accessToken', token, { httpOnly: true, maxAge: maxAge * 1000 })
 

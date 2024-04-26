@@ -19,7 +19,6 @@ exports.addClient = (req, res, next) => {
     taxId,
     legalForm,
     active,
-    createdAt: new Date(),
   })
 
   newClient
@@ -85,7 +84,7 @@ exports.getClients = (req, res, next) => {
   let totalItems = 0
 
   Client.find()
-    .count()
+    .countDocuments()
     .then((numProducts) => {
       totalItems = numProducts
 
@@ -114,6 +113,26 @@ exports.getClients = (req, res, next) => {
     })
 }
 
+exports.getClient = (req, res, next) => {
+  const result = validationResult(req)
+
+  if (!result.isEmpty()) {
+    return res.status(400).json({ message: result })
+  }
+
+  const clientId = req.params.clientId
+
+  Client.findById(clientId)
+    .then((client) => {
+      res.status(200).json({ data: client })
+    })
+    .catch((err) => {
+      const error = new Error(err)
+      error.message = `Could not find client ${clientId}`
+      return next(error)
+    })
+}
+
 exports.deleteClient = (req, res, next) => {
   const result = validationResult(req)
 
@@ -125,7 +144,6 @@ exports.deleteClient = (req, res, next) => {
 
   Client.deleteOne({ _id: clientId })
     .then(() => {
-      console.log('DESTROYED PRODUCT')
       res.status(200).json({ message: 'Successfully deleted' })
     })
     .catch((err) => {
