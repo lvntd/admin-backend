@@ -1,3 +1,3 @@
 exports.get404 = (req, res, next) => {
-  res.status(404).json({ message: 'Not found' })
+  res.status(404).json({ message: '404: Not found' })
 }
