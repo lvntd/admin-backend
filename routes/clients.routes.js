@@ -27,16 +27,6 @@ const clientSchema = {
     },
     trim: true, // Removes leading and trailing spaces
     escape: true, // Escapes HTML entities
-    // CUSTOM ASYNC VALIDATION: Check if id already exists
-    custom: {
-      options: (value) => {
-        return Client.findOne({ taxId: value }).then((existingClient) => {
-          if (existingClient) {
-            return Promise.reject('This id already exists')
-          }
-        })
-      },
-    },
   },
   active: { isBoolean: { errorMessage: 'active field is required' } },
   legalForm: {

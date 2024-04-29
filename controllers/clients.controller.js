@@ -1,8 +1,6 @@
 const { validationResult } = require('express-validator')
 const Client = require('../models/client.model')
 
-const ITEMS_PER_PAGE = 5
-
 exports.addClient = (req, res, next) => {
   const errors = validationResult(req)
   if (!errors.isEmpty()) {
@@ -14,31 +12,39 @@ exports.addClient = (req, res, next) => {
   const { name, taxId, legalForm, active } = req.body
   const image = req.file
 
-  const newClient = new Client({
-    name,
-    taxId,
-    legalForm,
-    active,
-  })
+  Client.findOne({ taxId }).then((existingClient) => {
+    if (existingClient) {
+      return res
+        .status(400)
+        .json({ message: `Client already exists with this id ${taxId}` })
+    }
 
-  newClient
-    .save()
-    .then((client) => {
-      if (client) {
-        // Ensure client is not null (stopped promise chain will result in client being null)
-        res
-          .status(201)
-          .json({ message: 'Client created successfully', data: client })
-      }
+    const newClient = new Client({
+      name,
+      taxId,
+      legalForm,
+      active,
     })
-    .catch((err) => {
-      // Check to ensure no response has been sent
-      if (!res.headersSent) {
-        const error = new Error(err)
-        error.message = 'Could not create client'
-        return next(error)
-      }
-    })
+
+    newClient
+      .save()
+      .then((client) => {
+        if (client) {
+          // Ensure client is not null (stopped promise chain will result in client being null)
+          res
+            .status(201)
+            .json({ message: 'Client created successfully', data: client })
+        }
+      })
+      .catch((err) => {
+        // Check to ensure no response has been sent
+        if (!res.headersSent) {
+          const error = new Error(err)
+          error.message = 'Could not create client'
+          return next(error)
+        }
+      })
+  })
 }
 
 exports.editClient = (req, res, next) => {
@@ -50,7 +56,7 @@ exports.editClient = (req, res, next) => {
 
   const clientId = req.params.clientId
 
-  const { name, taxId, legalForm, image } = req.body
+  const { name, taxId, legalForm, active } = req.body
 
   Client.findById(clientId)
     .then((client) => {
@@ -60,7 +66,8 @@ exports.editClient = (req, res, next) => {
       client.name = name
       client.taxId = taxId
       client.legalForm = legalForm
-      client.image = image
+      client.active = active
+
       return client.save().then((result) => {
         res.status(200).json({ message: 'Client was updated' })
       })
@@ -80,29 +87,41 @@ exports.getClients = (req, res, next) => {
   }
 
   const page = Number(req.query.page)
-  const skip = (page - 1) * ITEMS_PER_PAGE
+  const perPage = Number(req.query.perPage) || 5
+  const skip = (page - 1) * perPage
   let totalItems = 0
 
-  Client.find()
+  // Search params
+  const active = req.query.active
+
+  console.log('ACTIVE', active)
+
+  const query = {}
+  if (active.length > 0) {
+    query.active = active === 'active'
+  }
+
+  Client.find(query)
     .countDocuments()
     .then((numProducts) => {
       totalItems = numProducts
 
-      return Client.find()
+      return Client.find(query)
+        .sort({ createdAt: -1 })
         .skip(skip)
-        .limit(ITEMS_PER_PAGE)
+        .limit(perPage)
         .then((clients) => {
           res.status(200).json({
             message: 'Success',
             data: clients,
             total: totalItems,
-            hasNextPage: ITEMS_PER_PAGE * page < totalItems,
+            hasNextPage: perPage * page < totalItems,
             hasPreviousPage: page > 1,
             currentPage: page,
             nextPage: page + 1,
             prevPage: page - 1,
-            lastPage: Math.ceil(totalItems / ITEMS_PER_PAGE),
-            perPage: ITEMS_PER_PAGE,
+            lastPage: Math.ceil(totalItems / perPage),
+            perPage: perPage,
           })
         })
         .catch((err) => {
