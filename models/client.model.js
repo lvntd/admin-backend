@@ -20,7 +20,7 @@ const clientSchema = new Schema(
       type: Boolean,
       required: true,
     },
-    image: {
+    imageUrl: {
       type: String,
       required: false,
     },

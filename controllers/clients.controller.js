@@ -9,8 +9,7 @@ exports.addClient = (req, res, next) => {
       .json({ message: 'Validation failed', errors: errors.array() })
   }
 
-  const { name, taxId, legalForm, active } = req.body
-  const image = req.file
+  const { name, taxId, legalForm, active, imageUrl } = req.body
 
   Client.findOne({ taxId }).then((existingClient) => {
     if (existingClient) {
@@ -24,6 +23,7 @@ exports.addClient = (req, res, next) => {
       taxId,
       legalForm,
       active,
+      imageUrl,
     })
 
     newClient

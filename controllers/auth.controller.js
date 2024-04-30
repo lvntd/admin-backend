@@ -17,7 +17,7 @@ exports.signup = async (req, res, next) => {
       .json({ message: 'Validation failed', errors: errors.array() })
   }
 
-  const { email, password, confirmPassword } = req.body
+  const { email, password } = req.body
 
   try {
     const user = await User.create({ email, password, role: 'admin' })
@@ -76,6 +76,7 @@ exports.me = async (req, res, next) => {
       throw Error('User not found')
     }
 
+    // @ts-ignore
     const user = await User.findById(parsedToken.id, { password: 0 })
 
     res.status(200).json({ accessToken: token, userData: user })
