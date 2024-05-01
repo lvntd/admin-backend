@@ -97,7 +97,7 @@ exports.getClients = (req, res, next) => {
   console.log('ACTIVE', active)
 
   const query = {}
-  if (active.length > 0) {
+  if (active) {
     query.active = active === 'active'
   }
 

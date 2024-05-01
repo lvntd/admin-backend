@@ -8,6 +8,7 @@ const path = require('path')
 const bodyParser = require('body-parser')
 const errorController = require('./controllers/error.controller')
 const clientRoutes = require('./routes/clients.routes')
+const projectRoutes = require('./routes/projects.routes')
 const authRoutes = require('./routes/auth.routes')
 const filesRoutes = require('./routes/files.routes')
 
@@ -35,6 +36,7 @@ app.use('/images', express.static(path.join(__dirname, 'images')))
 app.use('/clients', clientRoutes)
 app.use('/auth', authRoutes)
 app.use('/files', filesRoutes)
+app.use('/projects', projectRoutes)
 
 // Error handlers
 app.use(errorController.get404)

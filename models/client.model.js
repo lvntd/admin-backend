@@ -11,6 +11,7 @@ const clientSchema = new Schema(
     taxId: {
       type: Number,
       required: true,
+      unique: true,
     },
     legalForm: {
       type: String,
@@ -22,8 +23,8 @@ const clientSchema = new Schema(
     },
     imageUrl: {
       type: String,
-      required: false,
     },
+    projects: [{ type: Schema.Types.ObjectId, ref: 'Project' }],
   },
   { timestamps: true },
 )
