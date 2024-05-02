@@ -7,14 +7,24 @@ const projectSchema = new Schema(
     client: { type: mongoose.Schema.Types.ObjectId, ref: 'Client' },
     startDate: { type: Date },
     endDate: { type: Date },
+    pricing: {
+      currency: { type: String, enum: ['GEL', 'USD', 'EUR'], required: true },
+      amount: { type: Number, required: true },
+      period: {
+        type: String,
+        enum: ['ONE_OFF', 'MONTHLY', 'HOURLY'],
+        required: true,
+      },
+      vatable: { type: Boolean, required: true },
+    },
     status: {
       type: String,
       enum: ['NOT_STARTED', 'IN_PROGRESS', 'COMPLETED'],
       required: true,
     },
     projectTeam: {
-      inCharge: { type: mongoose.Schema.Types.ObjectId },
-      members: [{ type: mongoose.Schema.Types.ObjectId }],
+      inCharge: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+      members: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
     },
   },
   { timestamps: true },

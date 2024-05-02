@@ -5,6 +5,16 @@ const Schema = mongoose.Schema
 
 const userSchema = new Schema(
   {
+    firstName: {
+      type: String,
+      required: true,
+      minLength: 2,
+    },
+    lastName: {
+      type: String,
+      required: true,
+      minLength: 2,
+    },
     email: {
       type: String,
       required: true,
@@ -18,6 +28,13 @@ const userSchema = new Schema(
     },
     role: {
       type: String,
+      enum: ['admin', 'member'],
+      required: true,
+    },
+    departnemt: { type: Schema.Types.ObjectId, ref: 'Department' },
+    projects: [{ type: Schema.Types.ObjectId, ref: 'Project' }],
+    active: {
+      type: Boolean,
       required: true,
     },
   },
