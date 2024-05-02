@@ -3,7 +3,6 @@ const mongoose = require('mongoose')
 const session = require('express-session')
 const MongoDBStore = require('connect-mongodb-session')(session)
 const cors = require('cors')
-const multer = require('multer')
 const path = require('path')
 const bodyParser = require('body-parser')
 const errorController = require('./controllers/error.controller')
@@ -11,6 +10,7 @@ const clientRoutes = require('./routes/clients.routes')
 const projectRoutes = require('./routes/projects.routes')
 const authRoutes = require('./routes/auth.routes')
 const filesRoutes = require('./routes/files.routes')
+const { Server } = require('socket.io')
 
 const cookieParser = require('cookie-parser')
 
@@ -47,7 +47,15 @@ app.use((error, _req, res, _next) => {
 mongoose
   .connect(MONGODB_URI)
   .then(() => {
-    app.listen(3002)
+    const server = app.listen(3002)
+
+    const io = require('./socket').init(server, {
+      cors: { origin: 'http://localhost:3000', methods: ['GET', 'POST'] },
+    })
+
+    io.on('connection', (socket) => {
+      console.log('Client connected')
+    })
   })
   .catch((err) => {
     console.log(err)

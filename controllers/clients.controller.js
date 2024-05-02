@@ -1,5 +1,6 @@
 const { validationResult } = require('express-validator')
 const Client = require('../models/client.model')
+const io = require('../socket')
 
 exports.addClient = async (req, res, next) => {
   const errors = validationResult(req)
@@ -29,6 +30,7 @@ exports.addClient = async (req, res, next) => {
     const client = await newClient.save()
 
     if (client) {
+      io.getIO().emit('invalidate', { qk: ['clients'] })
       return res
         .status(201)
         .json({ message: 'Client created successfully', data: client })
@@ -152,6 +154,7 @@ exports.deleteClient = async (req, res, next) => {
 
   try {
     await Client.deleteOne({ _id: clientId })
+    io.getIO().emit('invalidate', { qk: ['clients'] })
     res.status(200).json({ message: 'Successfully deleted' })
   } catch (err) {
     const error = new Error(err)

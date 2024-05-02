@@ -7,12 +7,12 @@ const userSchema = new Schema(
   {
     firstName: {
       type: String,
-      required: true,
+      required: false,
       minLength: 2,
     },
     lastName: {
       type: String,
-      required: true,
+      required: false,
       minLength: 2,
     },
     email: {
@@ -35,7 +35,7 @@ const userSchema = new Schema(
     projects: [{ type: Schema.Types.ObjectId, ref: 'Project' }],
     active: {
       type: Boolean,
-      required: true,
+      required: false,
     },
   },
   { timestamps: true },
