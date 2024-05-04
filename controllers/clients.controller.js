@@ -1,8 +1,8 @@
-const { validationResult } = require('express-validator')
-const Client = require('../models/client.model')
-const io = require('../socket')
+import { validationResult } from 'express-validator'
+import { Client } from '../models/index.js'
+import io from '../socket.js'
 
-exports.addClient = async (req, res, next) => {
+export const addClient = async (req, res, next) => {
   const errors = validationResult(req)
   if (!errors.isEmpty()) {
     return res
@@ -44,7 +44,7 @@ exports.addClient = async (req, res, next) => {
   }
 }
 
-exports.editClient = async (req, res, next) => {
+export const editClient = async (req, res, next) => {
   const result = validationResult(req)
 
   if (!result.isEmpty()) {
@@ -78,7 +78,7 @@ exports.editClient = async (req, res, next) => {
   }
 }
 
-exports.getClients = async (req, res, next) => {
+export const getClients = async (req, res, next) => {
   const result = validationResult(req)
 
   if (!result.isEmpty()) {
@@ -124,7 +124,7 @@ exports.getClients = async (req, res, next) => {
   }
 }
 
-exports.getClient = async (req, res, next) => {
+export const getClient = async (req, res, next) => {
   const result = validationResult(req)
 
   if (!result.isEmpty()) {
@@ -143,7 +143,7 @@ exports.getClient = async (req, res, next) => {
   }
 }
 
-exports.deleteClient = async (req, res, next) => {
+export const deleteClient = async (req, res, next) => {
   const result = validationResult(req)
 
   if (!result.isEmpty()) {

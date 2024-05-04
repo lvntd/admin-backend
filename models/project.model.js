@@ -1,4 +1,4 @@
-const mongoose = require('mongoose')
+import mongoose from 'mongoose'
 
 const Schema = mongoose.Schema
 
@@ -30,4 +30,4 @@ const projectSchema = new Schema(
   { timestamps: true },
 )
 
-module.exports = mongoose.model('Project', projectSchema)
+export const Project = mongoose.model('Project', projectSchema)

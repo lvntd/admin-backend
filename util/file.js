@@ -1,7 +1,5 @@
-const { unlink } = require('fs')
+import { unlink } from 'fs'
 
-const deleteFile = (filePath, callback) => {
+export const deleteFileFs = (filePath, callback) => {
   unlink(filePath, callback)
 }
-
-exports.deleteFile = deleteFile

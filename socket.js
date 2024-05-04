@@ -1,8 +1,8 @@
-const { Server } = require('socket.io')
+import { Server } from 'socket.io'
 
 let io
 
-module.exports = {
+const socketIo = {
   init: (httpServer, options) => {
     io = new Server(httpServer, options)
 
@@ -15,3 +15,5 @@ module.exports = {
     return io
   },
 }
+
+export default socketIo

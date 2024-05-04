@@ -1,10 +1,8 @@
-const { validationResult } = require('express-validator')
-const Project = require('../models/project.model')
-const Client = require('../models/client.model')
-const User = require('../models/user.model')
-const mongoose = require('mongoose')
+import { validationResult } from 'express-validator'
+import { Project, Client, User } from '../models/index.js'
+import mongoose from 'mongoose'
 
-exports.createProject = async (req, res, next) => {
+export const createProject = async (req, res, next) => {
   const errors = validationResult(req)
   if (!errors.isEmpty()) {
     return res

@@ -1,8 +1,8 @@
-const jwt = require('jsonwebtoken')
+import jwt from 'jsonwebtoken'
 
 const jwtSecret = process.env.JWT_SECRET || 'xyz890'
 
-const requireAuth = (req, res, next) => {
+export const requireAuth = (req, res, next) => {
   const token = req.cookies.accessToken || req.headers.authorization
 
   if (token) {
@@ -18,5 +18,3 @@ const requireAuth = (req, res, next) => {
   }
   res.status(403).json({ message: 'Not logged in' })
 }
-
-module.exports = { requireAuth }

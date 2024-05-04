@@ -1,7 +1,6 @@
-const { validationResult, cookie } = require('express-validator')
-const jwt = require('jsonwebtoken')
-
-const User = require('../models/user.model')
+import { validationResult } from 'express-validator'
+import jwt from 'jsonwebtoken'
+import { User } from '../models/index.js'
 
 const maxAge = 3 * 24 * 60 * 60
 
@@ -13,7 +12,7 @@ const createToken = (id) => {
   })
 }
 
-exports.signup = async (req, res, next) => {
+export const signup = async (req, res, next) => {
   const errors = validationResult(req)
   if (!errors.isEmpty()) {
     return res
@@ -40,7 +39,7 @@ exports.signup = async (req, res, next) => {
   }
 }
 
-exports.login = async (req, res, next) => {
+export const login = async (req, res, next) => {
   const errors = validationResult(req)
   if (!errors.isEmpty()) {
     return res
@@ -64,7 +63,7 @@ exports.login = async (req, res, next) => {
   }
 }
 
-exports.me = async (req, res, next) => {
+export const me = async (req, res, next) => {
   const errors = validationResult(req)
   if (!errors.isEmpty()) {
     return res

@@ -1,5 +1,5 @@
-const mongoose = require('mongoose')
-const bcrypt = require('bcrypt')
+import mongoose from 'mongoose'
+import bcrypt from 'bcrypt'
 
 const Schema = mongoose.Schema
 
@@ -74,4 +74,4 @@ userSchema.statics.login = async function (email, password) {
   throw new Error('This email does not exist')
 }
 
-module.exports = mongoose.model('User', userSchema)
+export const User = mongoose.model('User', userSchema)
