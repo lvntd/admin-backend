@@ -5,8 +5,12 @@ const User = require('../models/user.model')
 
 const maxAge = 3 * 24 * 60 * 60
 
+const jwtSecret = process.env.JWT_SECRET || 'xyz890'
+
 const createToken = (id) => {
-  return jwt.sign({ id }, 'tediashvili secret', { expiresIn: maxAge })
+  return jwt.sign({ id }, jwtSecret, {
+    expiresIn: maxAge,
+  })
 }
 
 exports.signup = async (req, res, next) => {

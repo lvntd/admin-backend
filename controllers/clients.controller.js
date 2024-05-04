@@ -111,7 +111,7 @@ exports.getClients = async (req, res, next) => {
       total: totalItems,
       hasNextPage: perPage * page < totalItems,
       hasPreviousPage: page > 1,
-      currentPage: page,
+      currentPage: page || 1,
       nextPage: page + 1,
       prevPage: page - 1,
       lastPage: Math.ceil(totalItems / perPage),
