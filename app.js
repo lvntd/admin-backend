@@ -18,6 +18,7 @@ import {
   filesRoutes,
   projectRoutes,
 } from './routes/index.js'
+import { userRoutes } from './routes/users.routes.js'
 
 const __filename = fileURLToPath(import.meta.url) // get the resolved path to the file
 const __dirname = path.dirname(__filename)
@@ -49,6 +50,7 @@ app.use(express.static(path.join(__dirname, 'public')))
 app.use('/images', express.static(path.join(__dirname, 'images')))
 
 // Routes
+app.use('/users', userRoutes)
 app.use('/clients', clientRoutes)
 app.use('/auth', authRoutes)
 app.use('/files', filesRoutes)
