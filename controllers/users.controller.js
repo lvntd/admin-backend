@@ -54,9 +54,13 @@ export const editUser = async (req, res, next) => {
   const { userId } = req.params
 
   try {
-    const updatedUser = await User.findByIdAndUpdate(userId, {
-      $set: { ...req.body },
-    })
+    const updatedUser = await User.findByIdAndUpdate(
+      userId,
+      {
+        $set: { ...req.body },
+      },
+      { new: true },
+    )
 
     return res
       .status(200)

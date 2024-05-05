@@ -51,22 +51,16 @@ export const editClient = async (req, res, next) => {
     return res.status(400).json({ message: result })
   }
 
-  const clientId = req.params.clientId
-
-  const { name, taxId, legalForm, active } = req.body
+  const { clientId } = req.params
 
   try {
-    const client = await Client.findById(clientId)
-
-    if (client === null) {
-      return res.json({ message: 'Client was not found' })
-    }
-    client.name = name
-    client.taxId = taxId
-    client.legalForm = legalForm
-    client.active = active
-
-    const updatedClient = await client.save()
+    const updatedClient = await Client.findByIdAndUpdate(
+      clientId,
+      {
+        ...req.body,
+      },
+      { new: true },
+    )
 
     return res
       .status(200)
