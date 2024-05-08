@@ -1,6 +1,6 @@
-const { validationResult } = require('express-validator')
-const multer = require('multer')
-const { deleteFile } = require('../util/file')
+import { validationResult } from 'express-validator'
+import multer from 'multer'
+import { deleteFileFs } from '../util/file.js'
 
 const fileStorage = multer.diskStorage({
   destination: (req, file, cb) => {
@@ -29,7 +29,7 @@ const upload = multer({
   fileFilter: fileFilter,
 }).single('file')
 
-exports.uploadFile = (req, res, next) => {
+export const uploadFile = (req, res, next) => {
   const errors = validationResult(req)
   if (!errors.isEmpty()) {
     return res
@@ -56,7 +56,7 @@ exports.uploadFile = (req, res, next) => {
   })
 }
 
-exports.deleteFile = (req, res, next) => {
+export const deleteFile = (req, res, next) => {
   const errors = validationResult(req)
   if (!errors.isEmpty()) {
     return res
@@ -65,7 +65,7 @@ exports.deleteFile = (req, res, next) => {
   }
 
   const filePath = req.query.filePath
-  deleteFile(filePath, (error) => {
+  deleteFileFs(filePath, (error) => {
     if (error) {
       res.status(400).json({ message: 'Could not delete image', error: error })
     } else {

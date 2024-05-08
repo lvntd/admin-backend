@@ -1,18 +1,16 @@
-const mongoose = require('mongoose')
-const bcrypt = require('bcrypt')
-
-const Schema = mongoose.Schema
+import { Schema, model } from 'mongoose'
+import bcrypt from 'bcrypt'
 
 const userSchema = new Schema(
   {
     firstName: {
       type: String,
-      required: false,
+      required: true,
       minLength: 2,
     },
     lastName: {
       type: String,
-      required: false,
+      required: true,
       minLength: 2,
     },
     email: {
@@ -24,38 +22,25 @@ const userSchema = new Schema(
     password: {
       type: String,
       required: true,
-      minLength: 4,
+      minLength: 8,
     },
     role: {
       type: String,
       enum: ['admin', 'member'],
       required: true,
     },
-    departnemt: { type: Schema.Types.ObjectId, ref: 'Department' },
+    phoneNumber: { type: String, minLength: 9 },
+    birthday: Date,
+    joinDate: Date,
     projects: [{ type: Schema.Types.ObjectId, ref: 'Project' }],
+    about: { type: String, maxLength: 500 },
     active: {
       type: Boolean,
-      required: false,
+      required: true,
     },
   },
   { timestamps: true },
 )
-
-// @ts-ignore
-userSchema.pre('save', async function (next) {
-  console.log('User is about to be created and saved', this)
-
-  const salt = await bcrypt.genSalt()
-
-  this.password = await bcrypt.hash(this.password, salt)
-
-  next()
-})
-
-userSchema.post('save', function (doc, next) {
-  console.log('New user was created', doc)
-  next()
-})
 
 userSchema.statics.login = async function (email, password) {
   // @ts-ignore
@@ -74,4 +59,4 @@ userSchema.statics.login = async function (email, password) {
   throw new Error('This email does not exist')
 }
 
-module.exports = mongoose.model('User', userSchema)
+export const User = model('User', userSchema)

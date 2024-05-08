@@ -1,10 +1,9 @@
 import { validationResult } from 'express-validator'
-import { Client } from '../models/index.js'
+import { User } from '../models/index.js'
 import io from '../socket.js'
-import { serverResponse } from '../util/response.js'
-import { apiMessages } from '../config/messages.js'
+import bcrypt from 'bcrypt'
 
-export const addClient = async (req, res, next) => {
+export const createNewUser = async (req, res, next) => {
   const errors = validationResult(req)
   if (!errors.isEmpty()) {
     return res
@@ -12,64 +11,68 @@ export const addClient = async (req, res, next) => {
       .json({ message: 'Validation failed', errors: errors.array() })
   }
 
-  const { name, taxId, legalForm, active, imageUrl } = req.body
+  const { email } = req.body
 
   try {
-    const existingClient = await Client.findOne({ taxId })
-    if (existingClient) {
-      return serverResponse.sendError(res, apiMessages.ALREADY_EXIST)
+    const existingUser = await User.findOne({ email })
+    if (existingUser) {
+      return res
+        .status(400)
+        .json({ message: `User already exists with this id ${email}` })
     }
 
-    const newClient = new Client({
-      name,
-      taxId,
-      legalForm,
-      active,
-      imageUrl,
-    })
-    const client = await newClient.save()
+    const defaultPassword = 'Test123123' // TODO. generate and send by email
 
-    if (client) {
-      io.getIO().emit('invalidate', { qk: ['clients'] })
-      // @ts-ignore
-      return serverResponse.sendSuccess(res, apiMessages.SUCCESSFUL, client)
+    const salt = await bcrypt.genSalt()
+
+    const password = await bcrypt.hash(defaultPassword, salt)
+    const newUser = new User({ ...req.body, password })
+    const user = await newUser.save()
+
+    if (user) {
+      io.getIO().emit('invalidate', { qk: ['users'] })
+      return res
+        .status(201)
+        .json({ message: 'User created successfully', data: user })
     }
   } catch (err) {
     if (!res.headersSent) {
-      return next(err)
+      const error = new Error(err)
+      error.message = 'Could not create user'
+      return next(error)
     }
   }
 }
 
-export const editClient = async (req, res, next) => {
+export const editUser = async (req, res, next) => {
   const errors = validationResult(req)
 
   if (!errors.isEmpty()) {
     return res.status(400).json({ message: errors.array() })
   }
 
-  const { clientId } = req.params
+  const { userId } = req.params
 
   try {
-    const updatedClient = await Client.findByIdAndUpdate(
-      clientId,
+    const updatedUser = await User.findByIdAndUpdate(
+      userId,
       {
-        ...req.body,
+        $set: { ...req.body },
       },
       { new: true },
     )
 
     return res
       .status(200)
-      .json({ message: 'Client was updated', data: updatedClient })
+      .json({ message: 'User was updated', data: updatedUser })
   } catch (err) {
     const error = new Error(err)
-    error.message = `Could not update client: ${clientId}`
+    error.message = `Could not update user: ${userId}`
     return next(error)
   }
 }
 
-export const getClients = async (req, res, next) => {
+export const getUsers = async (req, res, next) => {
   const errors = validationResult(req)
 
   if (!errors.isEmpty()) {
@@ -79,7 +82,6 @@ export const getClients = async (req, res, next) => {
   const page = Number(req.query.page)
   const perPage = Number(req.query.perPage) || 5
   const skip = (page - 1) * perPage
-  let totalItems = 0
 
   // Search params
   const active = req.query.active
@@ -90,15 +92,15 @@ export const getClients = async (req, res, next) => {
   }
 
   try {
-    const totalItems = await Client.find(query).countDocuments()
-    const clients = await Client.find(query)
+    const totalItems = await User.find(query).countDocuments()
+    const users = await User.find(query)
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(perPage)
 
     return res.status(200).json({
       message: 'Success',
-      data: clients,
+      data: users,
       total: totalItems,
       hasNextPage: perPage * page < totalItems,
       hasPreviousPage: page > 1,
@@ -109,47 +111,49 @@ export const getClients = async (req, res, next) => {
       perPage: perPage,
     })
   } catch (err) {
+    console.log(err)
     const error = new Error(err)
-    error.message = 'Could not get clients'
+    error.message = 'Could not get users'
     return next(error)
   }
 }
 
-export const getClient = async (req, res, next) => {
+export const getUser = async (req, res, next) => {
   const errors = validationResult(req)
 
   if (!errors.isEmpty()) {
     return res.status(400).json({ message: errors.array() })
   }
 
-  const clientId = req.params.clientId
+  const userId = req.params.userId
 
   try {
-    const client = Client.findById(clientId)
-    return res.status(200).json({ data: client })
+    const user = await User.findById(userId, { password: 0 })
+    return res.status(200).json({ data: user })
   } catch (err) {
+    console.log(err)
     const error = new Error(err)
-    error.message = `Could not find client ${clientId}`
+    error.message = `Could not find user: ${userId}`
     return next(error)
   }
 }
 
-export const deleteClient = async (req, res, next) => {
+export const deleteUser = async (req, res, next) => {
   const errors = validationResult(req)
 
   if (!errors.isEmpty()) {
     return res.status(400).json({ message: errors.array() })
   }
 
-  const clientId = req.params.clientId
+  const userId = req.params.userId
 
   try {
-    await Client.deleteOne({ _id: clientId })
-    io.getIO().emit('invalidate', { qk: ['clients'] })
+    await User.deleteOne({ _id: userId })
+    io.getIO().emit('invalidate', { qk: ['users'] })
     res.status(200).json({ message: 'Successfully deleted' })
   } catch (err) {
     const error = new Error(err)
-    error.message = `Could not delete client ${clientId}`
+    error.message = `Could not delete user ${userId}`
     return next(error)
   }
 }

@@ -1,21 +1,32 @@
-const express = require('express')
-const mongoose = require('mongoose')
-const session = require('express-session')
-const MongoDBStore = require('connect-mongodb-session')(session)
-const cors = require('cors')
-const path = require('path')
-const fs = require('fs')
-const bodyParser = require('body-parser')
-const helmet = require('helmet')
-const morgan = require('morgan')
-const errorController = require('./controllers/error.controller')
-const clientRoutes = require('./routes/clients.routes')
-const projectRoutes = require('./routes/projects.routes')
-const authRoutes = require('./routes/auth.routes')
-const filesRoutes = require('./routes/files.routes')
-const cookieParser = require('cookie-parser')
+import connectSession from 'connect-mongodb-session'
+import express from 'express'
+import mongoose from 'mongoose'
+import session from 'express-session'
+import cors from 'cors'
+import path from 'path'
+import fs from 'fs'
+import bodyParser from 'body-parser'
+import helmet from 'helmet'
+import morgan from 'morgan'
+import cookieParser from 'cookie-parser'
+import { get404 } from './controllers/index.js'
+import socketIo from './socket.js'
+import { fileURLToPath } from 'url'
+import {
+  authRoutes,
+  clientRoutes,
+  filesRoutes,
+  projectRoutes,
+} from './routes/index.js'
+import { userRoutes } from './routes/users.routes.js'
+import { serverResponse } from './util/response.js'
+
+const __filename = fileURLToPath(import.meta.url) // get the resolved path to the file
+const __dirname = path.dirname(__filename)
 
 const MONGODB_URI = `mongodb+srv://${process.env.MONGO_USER}:${process.env.MONGO_PASSWORD}@cluster0.hzpvtnv.mongodb.net/?retryWrites=true&w=majority`
+
+const MongoDBStore = connectSession(session)
 
 const app = express()
 new MongoDBStore({
@@ -30,7 +41,6 @@ const accessLogStream = fs.createWriteStream(
 
 // Middlewares
 app.use(cors())
-// @ts-ignore
 app.use(helmet())
 app.use(morgan('combined', { stream: accessLogStream }))
 app.use(bodyParser.urlencoded({ extended: false }))
@@ -41,15 +51,16 @@ app.use(express.static(path.join(__dirname, 'public')))
 app.use('/images', express.static(path.join(__dirname, 'images')))
 
 // Routes
+app.use('/users', userRoutes)
 app.use('/clients', clientRoutes)
 app.use('/auth', authRoutes)
 app.use('/files', filesRoutes)
 app.use('/projects', projectRoutes)
 
 // Error handlers
-app.use(errorController.get404)
+app.use(get404)
 app.use((error, _req, res, _next) => {
-  res.status(500).json({ message: error.message })
+  serverResponse.sendError(res, error)
 })
 
 mongoose
@@ -57,7 +68,7 @@ mongoose
   .then(() => {
     const server = app.listen(process.env.PORT || 3002)
 
-    const io = require('./socket').init(server, {
+    const io = socketIo.init(server, {
       cors: { origin: process.env.FRONTEND_URL, methods: ['GET', 'POST'] },
     })
 

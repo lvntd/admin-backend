@@ -1,4 +1,4 @@
-const mongoose = require('mongoose')
+import mongoose from 'mongoose'
 
 const Schema = mongoose.Schema
 
@@ -7,6 +7,7 @@ const projectSchema = new Schema(
     client: { type: mongoose.Schema.Types.ObjectId, ref: 'Client' },
     startDate: { type: Date },
     endDate: { type: Date },
+    description: { type: String },
     pricing: {
       currency: { type: String, enum: ['GEL', 'USD', 'EUR'], required: true },
       amount: { type: Number, required: true },
@@ -30,4 +31,4 @@ const projectSchema = new Schema(
   { timestamps: true },
 )
 
-module.exports = mongoose.model('Project', projectSchema)
+export const Project = mongoose.model('Project', projectSchema)

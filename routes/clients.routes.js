@@ -1,10 +1,15 @@
-const { checkSchema, param } = require('express-validator')
-const Client = require('../models/client.model')
-const express = require('express')
-const clientsController = require('../controllers/clients.controller')
-const { requireAuth } = require('../middleware/auth.middleware')
+import express from 'express'
+import { checkSchema, param } from 'express-validator'
+import { requireAuth } from '../middleware/auth.middleware.js'
+import {
+  addClient,
+  deleteClient,
+  editClient,
+  getClient,
+  getClients,
+} from '../controllers/index.js'
 
-const router = express.Router()
+const clientRoutes = express.Router()
 
 const clientSchema = {
   name: {
@@ -34,34 +39,29 @@ const clientSchema = {
   },
 }
 
-router.post(
-  '/',
-  requireAuth,
-  checkSchema(clientSchema),
-  clientsController.addClient,
-)
-router.get('/all', requireAuth, clientsController.getClients)
+clientRoutes.post('/', requireAuth, checkSchema(clientSchema), addClient)
+clientRoutes.get('/all', requireAuth, getClients)
 
-router.put(
+clientRoutes.put(
   '/:clientId',
   requireAuth,
   param('clientId', ':clientId is required variable in path').notEmpty(),
   checkSchema(clientSchema),
-  clientsController.editClient,
+  editClient,
 )
 
-router.get(
+clientRoutes.get(
   '/:clientId',
   requireAuth,
   param('clientId', 'clientId is required variable in path').notEmpty(),
-  clientsController.getClient,
+  getClient,
 )
 
-router.delete(
+clientRoutes.delete(
   '/:clientId',
   requireAuth,
   param('clientId', 'clientId is required variable in path').notEmpty(),
-  clientsController.deleteClient,
+  deleteClient,
 )
 
-module.exports = router
+export { clientRoutes }

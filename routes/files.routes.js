@@ -1,9 +1,9 @@
-const express = require('express')
-const filesController = require('../controllers/files.controller')
+import express from 'express'
+import { deleteFile, uploadFile } from '../controllers/index.js'
 
-const router = express.Router()
+const filesRoutes = express.Router()
 
-router.post('/', filesController.uploadFile)
-router.delete('/', filesController.deleteFile)
+filesRoutes.post('/', uploadFile)
+filesRoutes.delete('/', deleteFile)
 
-module.exports = router
+export { filesRoutes }

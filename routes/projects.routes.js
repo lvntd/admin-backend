@@ -1,9 +1,9 @@
-const express = require('express')
-const projectsController = require('../controllers/projects.controller')
-const { requireAuth } = require('../middleware/auth.middleware')
+import express from 'express'
+import { requireAuth } from '../middleware/auth.middleware.js'
+import { createProject } from '../controllers/index.js'
 
-const router = express.Router()
+const projectRoutes = express.Router()
 
-router.post('/', requireAuth, projectsController.createProject)
+projectRoutes.post('/', requireAuth, createProject)
 
-module.exports = router
+export { projectRoutes }
