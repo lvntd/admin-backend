@@ -1,6 +1,8 @@
 import { validationResult } from 'express-validator'
 import { Client } from '../models/index.js'
 import io from '../socket.js'
+import { serverResponse } from '../util/response.js'
+import { apiMessages } from '../config/messages.js'
 
 export const addClient = async (req, res, next) => {
   const errors = validationResult(req)
@@ -15,9 +17,7 @@ export const addClient = async (req, res, next) => {
   try {
     const existingClient = await Client.findOne({ taxId })
     if (existingClient) {
-      return res
-        .status(400)
-        .json({ message: `Client already exists with this id ${taxId}` })
+      return serverResponse.sendError(res, apiMessages.ALREADY_EXIST)
     }
 
     const newClient = new Client({
@@ -31,24 +31,21 @@ export const addClient = async (req, res, next) => {
 
     if (client) {
       io.getIO().emit('invalidate', { qk: ['clients'] })
-      return res
-        .status(201)
-        .json({ message: 'Client created successfully', data: client })
+      // @ts-ignore
+      return serverResponse.sendSuccess(res, apiMessages.SUCCESSFUL, client)
     }
   } catch (err) {
     if (!res.headersSent) {
-      const error = new Error(err)
-      error.message = 'Could not create client'
-      return next(error)
+      return next(err)
     }
   }
 }
 
 export const editClient = async (req, res, next) => {
-  const result = validationResult(req)
+  const errors = validationResult(req)
 
-  if (!result.isEmpty()) {
-    return res.status(400).json({ message: result })
+  if (!errors.isEmpty()) {
+    return res.status(400).json({ message: errors.array() })
   }
 
   const { clientId } = req.params
@@ -73,10 +70,10 @@ export const editClient = async (req, res, next) => {
 }
 
 export const getClients = async (req, res, next) => {
-  const result = validationResult(req)
+  const errors = validationResult(req)
 
-  if (!result.isEmpty()) {
-    return res.status(400).json({ message: result })
+  if (!errors.isEmpty()) {
+    return res.status(400).json({ message: errors.array() })
   }
 
   const page = Number(req.query.page)
@@ -119,10 +116,10 @@ export const getClients = async (req, res, next) => {
 }
 
 export const getClient = async (req, res, next) => {
-  const result = validationResult(req)
+  const errors = validationResult(req)
 
-  if (!result.isEmpty()) {
-    return res.status(400).json({ message: result })
+  if (!errors.isEmpty()) {
+    return res.status(400).json({ message: errors.array() })
   }
 
   const clientId = req.params.clientId
@@ -138,10 +135,10 @@ export const getClient = async (req, res, next) => {
 }
 
 export const deleteClient = async (req, res, next) => {
-  const result = validationResult(req)
+  const errors = validationResult(req)
 
-  if (!result.isEmpty()) {
-    return res.status(400).json({ message: result })
+  if (!errors.isEmpty()) {
+    return res.status(400).json({ message: errors.array() })
   }
 
   const clientId = req.params.clientId

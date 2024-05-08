@@ -1,6 +1,8 @@
 import { validationResult } from 'express-validator'
 import jwt from 'jsonwebtoken'
 import { User } from '../models/index.js'
+import { serverResponse } from '../util/response.js'
+import { apiMessages } from '../config/messages.js'
 
 const maxAge = 3 * 24 * 60 * 60
 
@@ -33,9 +35,10 @@ export const signup = async (req, res, next) => {
       secure: false, // TODO. should be true in production
     })
 
-    res.status(201).json(user)
+    // @ts-ignore
+    serverResponse.sendSuccess(res, apiMessages.SUCCESSFUL, user)
   } catch (error) {
-    res.status(400).json(error)
+    next(error)
   }
 }
 
@@ -58,8 +61,7 @@ export const login = async (req, res, next) => {
 
     res.status(200).json({ accessToken: token, userData: user })
   } catch (error) {
-    console.log({ error })
-    res.status(400).json({ message: error.message })
+    next(error)
   }
 }
 
@@ -84,7 +86,6 @@ export const me = async (req, res, next) => {
 
     res.status(200).json({ accessToken: token, userData: user })
   } catch (error) {
-    console.log({ error })
-    res.status(404).json({ message: error.message })
+    next(error)
   }
 }

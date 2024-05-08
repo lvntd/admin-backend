@@ -19,6 +19,7 @@ import {
   projectRoutes,
 } from './routes/index.js'
 import { userRoutes } from './routes/users.routes.js'
+import { serverResponse } from './util/response.js'
 
 const __filename = fileURLToPath(import.meta.url) // get the resolved path to the file
 const __dirname = path.dirname(__filename)
@@ -59,7 +60,7 @@ app.use('/projects', projectRoutes)
 // Error handlers
 app.use(get404)
 app.use((error, _req, res, _next) => {
-  res.status(500).json({ message: error.message })
+  serverResponse.sendError(res, error)
 })
 
 mongoose

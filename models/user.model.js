@@ -29,7 +29,11 @@ const userSchema = new Schema(
       enum: ['admin', 'member'],
       required: true,
     },
+    phoneNumber: { type: String, minLength: 9 },
+    birthday: Date,
+    joinDate: Date,
     projects: [{ type: Schema.Types.ObjectId, ref: 'Project' }],
+    about: { type: String, maxLength: 500 },
     active: {
       type: Boolean,
       required: true,

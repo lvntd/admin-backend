@@ -1,6 +1,8 @@
 import { validationResult } from 'express-validator'
 import { Project, Client, User } from '../models/index.js'
 import mongoose from 'mongoose'
+import { serverResponse } from '../util/response.js'
+import { apiMessages } from '../config/messages.js'
 
 export const createProject = async (req, res, next) => {
   const errors = validationResult(req)
@@ -30,15 +32,13 @@ export const createProject = async (req, res, next) => {
       client.projects.push(project._id)
       client.save()
     }
-    res
-      .status(201)
-      .json({ message: 'project created successfully', data: project })
+
+    // @ts-ignore
+    serverResponse.sendSuccess(res, apiMessages.SUCCESSFUL, project)
   } catch (err) {
     // Check to ensure no response has been sent
     if (!res.headersSent) {
-      const error = new Error(err)
-      error.message = 'Could not create project'
-      return next(error)
+      return next(err)
     }
   }
 }

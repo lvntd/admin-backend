@@ -45,10 +45,10 @@ export const createNewUser = async (req, res, next) => {
 }
 
 export const editUser = async (req, res, next) => {
-  const result = validationResult(req)
+  const errors = validationResult(req)
 
-  if (!result.isEmpty()) {
-    return res.status(400).json({ message: result })
+  if (!errors.isEmpty()) {
+    return res.status(400).json({ message: errors.array() })
   }
 
   const { userId } = req.params
@@ -73,10 +73,10 @@ export const editUser = async (req, res, next) => {
 }
 
 export const getUsers = async (req, res, next) => {
-  const result = validationResult(req)
+  const errors = validationResult(req)
 
-  if (!result.isEmpty()) {
-    return res.status(400).json({ message: result })
+  if (!errors.isEmpty()) {
+    return res.status(400).json({ message: errors.array() })
   }
 
   const page = Number(req.query.page)
@@ -119,16 +119,16 @@ export const getUsers = async (req, res, next) => {
 }
 
 export const getUser = async (req, res, next) => {
-  const result = validationResult(req)
+  const errors = validationResult(req)
 
-  if (!result.isEmpty()) {
-    return res.status(400).json({ message: result })
+  if (!errors.isEmpty()) {
+    return res.status(400).json({ message: errors.array() })
   }
 
   const userId = req.params.userId
 
   try {
-    const user = await User.findById(userId)
+    const user = await User.findById(userId, { password: 0 })
     return res.status(200).json({ data: user })
   } catch (err) {
     console.log(err)
@@ -139,10 +139,10 @@ export const getUser = async (req, res, next) => {
 }
 
 export const deleteUser = async (req, res, next) => {
-  const result = validationResult(req)
+  const errors = validationResult(req)
 
-  if (!result.isEmpty()) {
-    return res.status(400).json({ message: result })
+  if (!errors.isEmpty()) {
+    return res.status(400).json({ message: errors.array() })
   }
 
   const userId = req.params.userId
