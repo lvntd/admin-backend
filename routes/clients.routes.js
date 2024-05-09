@@ -1,4 +1,4 @@
-import express from 'express'
+import { Router } from 'express'
 import { checkSchema, param } from 'express-validator'
 import { requireAuth } from '../middleware/auth.middleware.js'
 import {
@@ -9,7 +9,7 @@ import {
   getClients,
 } from '../controllers/index.js'
 
-const clientRoutes = express.Router()
+const clientRoutes = Router()
 
 const clientSchema = {
   name: {

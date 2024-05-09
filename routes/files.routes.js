@@ -1,7 +1,7 @@
-import express from 'express'
+import { Router } from 'express'
 import { deleteFile, uploadFile } from '../controllers/index.js'
 
-const filesRoutes = express.Router()
+const filesRoutes = Router()
 
 filesRoutes.post('/', uploadFile)
 filesRoutes.delete('/', deleteFile)

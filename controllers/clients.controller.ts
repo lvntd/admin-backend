@@ -1,10 +1,15 @@
+import { Request, Response, NextFunction } from 'express'
 import { validationResult } from 'express-validator'
 import { Client } from '../models/index.js'
 import io from '../socket.js'
 import { serverResponse } from '../util/response.js'
 import { apiMessages } from '../config/messages.js'
 
-export const addClient = async (req, res, next) => {
+export const addClient = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
   const errors = validationResult(req)
   if (!errors.isEmpty()) {
     return res
@@ -41,7 +46,11 @@ export const addClient = async (req, res, next) => {
   }
 }
 
-export const editClient = async (req, res, next) => {
+export const editClient = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
   const errors = validationResult(req)
 
   if (!errors.isEmpty()) {
@@ -63,13 +72,15 @@ export const editClient = async (req, res, next) => {
       .status(200)
       .json({ message: 'Client was updated', data: updatedClient })
   } catch (err) {
-    const error = new Error(err)
-    error.message = `Could not update client: ${clientId}`
-    return next(error)
+    return next(err)
   }
 }
 
-export const getClients = async (req, res, next) => {
+export const getClients = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
   const errors = validationResult(req)
 
   if (!errors.isEmpty()) {
@@ -84,9 +95,9 @@ export const getClients = async (req, res, next) => {
   // Search params
   const active = req.query.active
 
-  const query = {}
+  const query: Record<string, string> = {}
   if (active) {
-    query.active = active
+    query.active = active as string
   }
 
   try {
@@ -109,13 +120,15 @@ export const getClients = async (req, res, next) => {
       perPage: perPage,
     })
   } catch (err) {
-    const error = new Error(err)
-    error.message = 'Could not get clients'
-    return next(error)
+    return next(err)
   }
 }
 
-export const getClient = async (req, res, next) => {
+export const getClient = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
   const errors = validationResult(req)
 
   if (!errors.isEmpty()) {
@@ -128,13 +141,15 @@ export const getClient = async (req, res, next) => {
     const client = Client.findById(clientId)
     return res.status(200).json({ data: client })
   } catch (err) {
-    const error = new Error(err)
-    error.message = `Could not find client ${clientId}`
-    return next(error)
+    return next(err)
   }
 }
 
-export const deleteClient = async (req, res, next) => {
+export const deleteClient = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
   const errors = validationResult(req)
 
   if (!errors.isEmpty()) {
@@ -148,8 +163,6 @@ export const deleteClient = async (req, res, next) => {
     io.getIO().emit('invalidate', { qk: ['clients'] })
     res.status(200).json({ message: 'Successfully deleted' })
   } catch (err) {
-    const error = new Error(err)
-    error.message = `Could not delete client ${clientId}`
-    return next(error)
+    return next(err)
   }
 }

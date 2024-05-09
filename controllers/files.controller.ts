@@ -1,6 +1,9 @@
+import { Request, Response, NextFunction } from 'express'
 import { validationResult } from 'express-validator'
 import multer from 'multer'
 import { deleteFileFs } from '../util/file.js'
+import { serverResponse } from '../util/response.js'
+import { apiMessages } from '../config/messages.js'
 
 const fileStorage = multer.diskStorage({
   destination: (req, file, cb) => {
@@ -11,7 +14,7 @@ const fileStorage = multer.diskStorage({
   },
 })
 
-const fileFilter = (req, file, cb) => {
+const fileFilter = (req: any, file: Express.Multer.File, cb: any) => {
   if (
     file.mimetype === 'image/png' ||
     file.mimetype === 'image/jpg' ||
@@ -29,7 +32,7 @@ const upload = multer({
   fileFilter: fileFilter,
 }).single('file')
 
-export const uploadFile = (req, res, next) => {
+export const uploadFile = (req: Request, res: Response, next: NextFunction) => {
   const errors = validationResult(req)
   if (!errors.isEmpty()) {
     return res
@@ -56,7 +59,7 @@ export const uploadFile = (req, res, next) => {
   })
 }
 
-export const deleteFile = (req, res, next) => {
+export const deleteFile = (req: Request, res: Response, next: NextFunction) => {
   const errors = validationResult(req)
   if (!errors.isEmpty()) {
     return res
@@ -64,12 +67,13 @@ export const deleteFile = (req, res, next) => {
       .json({ message: 'Validation failed', errors: errors.array() })
   }
 
-  const filePath = req.query.filePath
-  deleteFileFs(filePath, (error) => {
+  const filePath = req.query.filePath as string
+  deleteFileFs(filePath, (error: unknown) => {
     if (error) {
       res.status(400).json({ message: 'Could not delete image', error: error })
+      serverResponse.sendError(res, apiMessages.BAD_REQUEST)
     } else {
-      res.status(200).json({ message: 'Image deleted successfully' })
+      serverResponse.sendError(res, apiMessages.SUCCESSFUL)
     }
   })
 }

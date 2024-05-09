@@ -1,9 +1,9 @@
 import { Server } from 'socket.io'
 
-let io
+let io: Server
 
 const socketIo = {
-  init: (httpServer, options) => {
+  init: (httpServer: any, options: any) => {
     io = new Server(httpServer, options)
 
     return io

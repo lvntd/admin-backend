@@ -1,5 +1,5 @@
 import connectSession from 'connect-mongodb-session'
-import express from 'express'
+import express, { Request, Response, NextFunction } from 'express'
 import mongoose from 'mongoose'
 import session from 'express-session'
 import cors from 'cors'
@@ -59,7 +59,7 @@ app.use('/projects', projectRoutes)
 
 // Error handlers
 app.use(get404)
-app.use((error, _req, res, _next) => {
+app.use((error: Error, _req: Request, res: Response, _next: NextFunction) => {
   serverResponse.sendError(res, error)
 })
 

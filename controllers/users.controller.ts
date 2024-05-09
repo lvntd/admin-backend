@@ -2,8 +2,13 @@ import { validationResult } from 'express-validator'
 import { User } from '../models/index.js'
 import io from '../socket.js'
 import bcrypt from 'bcrypt'
+import { Request, Response, NextFunction } from 'express'
 
-export const createNewUser = async (req, res, next) => {
+export const createNewUser = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
   const errors = validationResult(req)
   if (!errors.isEmpty()) {
     return res
@@ -37,14 +42,16 @@ export const createNewUser = async (req, res, next) => {
     }
   } catch (err) {
     if (!res.headersSent) {
-      const error = new Error(err)
-      error.message = 'Could not create user'
-      return next(error)
+      return next(err)
     }
   }
 }
 
-export const editUser = async (req, res, next) => {
+export const editUser = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
   const errors = validationResult(req)
 
   if (!errors.isEmpty()) {
@@ -66,13 +73,15 @@ export const editUser = async (req, res, next) => {
       .status(200)
       .json({ message: 'User was updated', data: updatedUser })
   } catch (err) {
-    const error = new Error(err)
-    error.message = `Could not update user: ${userId}`
-    return next(error)
+    return next(err)
   }
 }
 
-export const getUsers = async (req, res, next) => {
+export const getUsers = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
   const errors = validationResult(req)
 
   if (!errors.isEmpty()) {
@@ -86,9 +95,9 @@ export const getUsers = async (req, res, next) => {
   // Search params
   const active = req.query.active
 
-  const query = {}
+  const query: Record<string, string> = {}
   if (active) {
-    query.active = active
+    query.active = active as string
   }
 
   try {
@@ -111,14 +120,15 @@ export const getUsers = async (req, res, next) => {
       perPage: perPage,
     })
   } catch (err) {
-    console.log(err)
-    const error = new Error(err)
-    error.message = 'Could not get users'
-    return next(error)
+    return next(err)
   }
 }
 
-export const getUser = async (req, res, next) => {
+export const getUser = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
   const errors = validationResult(req)
 
   if (!errors.isEmpty()) {
@@ -131,14 +141,15 @@ export const getUser = async (req, res, next) => {
     const user = await User.findById(userId, { password: 0 })
     return res.status(200).json({ data: user })
   } catch (err) {
-    console.log(err)
-    const error = new Error(err)
-    error.message = `Could not find user: ${userId}`
-    return next(error)
+    return next(err)
   }
 }
 
-export const deleteUser = async (req, res, next) => {
+export const deleteUser = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
   const errors = validationResult(req)
 
   if (!errors.isEmpty()) {
@@ -152,8 +163,6 @@ export const deleteUser = async (req, res, next) => {
     io.getIO().emit('invalidate', { qk: ['users'] })
     res.status(200).json({ message: 'Successfully deleted' })
   } catch (err) {
-    const error = new Error(err)
-    error.message = `Could not delete user ${userId}`
-    return next(error)
+    return next(err)
   }
 }

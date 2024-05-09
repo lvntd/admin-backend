@@ -1,4 +1,10 @@
-export const apiMessages = {
+export type ResponseMessage = {
+  code: number
+  message: string
+  success: boolean
+}
+
+export const apiMessages: Record<string, ResponseMessage> = {
   AUTHENTICATION_FAILED: {
     code: 400,
     message: 'Authentication failed. Please login with valid credentials.',

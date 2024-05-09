@@ -1,7 +1,7 @@
-import express from 'express'
+import { Router } from 'express'
 import { login, signup, me } from '../controllers/index.js'
 
-const authRoutes = express.Router()
+const authRoutes = Router()
 
 authRoutes.post('/signup', signup)
 authRoutes.post('/login', login)

@@ -1,4 +1,4 @@
-import express from 'express'
+import { Router } from 'express'
 import { param } from 'express-validator'
 import { requireAuth } from '../middleware/auth.middleware.js'
 import {
@@ -10,7 +10,7 @@ import {
   getUsers,
 } from '../controllers/index.js'
 
-const userRoutes = express.Router()
+const userRoutes = Router()
 
 userRoutes.post('/', requireAuth, createNewUser)
 userRoutes.get('/', requireAuth, getUsers)

@@ -1,20 +1,26 @@
+import { Request, Response, NextFunction } from 'express'
 import { validationResult } from 'express-validator'
 import jwt from 'jsonwebtoken'
 import { User } from '../models/index.js'
 import { serverResponse } from '../util/response.js'
 import { apiMessages } from '../config/messages.js'
+import { Types } from 'mongoose'
 
 const maxAge = 3 * 24 * 60 * 60
 
 const jwtSecret = process.env.JWT_SECRET || 'xyz890'
 
-const createToken = (id) => {
+const createToken = (id: Types.ObjectId) => {
   return jwt.sign({ id }, jwtSecret, {
     expiresIn: maxAge,
   })
 }
 
-export const signup = async (req, res, next) => {
+export const signup = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
   const errors = validationResult(req)
   if (!errors.isEmpty()) {
     return res
@@ -31,8 +37,6 @@ export const signup = async (req, res, next) => {
     res.cookie('accessToken', token, {
       httpOnly: true,
       maxAge: maxAge * 1000,
-      sameSite: 'Lax',
-      secure: false, // TODO. should be true in production
     })
 
     // @ts-ignore
@@ -42,7 +46,11 @@ export const signup = async (req, res, next) => {
   }
 }
 
-export const login = async (req, res, next) => {
+export const login = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
   const errors = validationResult(req)
   if (!errors.isEmpty()) {
     return res
@@ -65,7 +73,7 @@ export const login = async (req, res, next) => {
   }
 }
 
-export const me = async (req, res, next) => {
+export const me = async (req: Request, res: Response, next: NextFunction) => {
   const errors = validationResult(req)
   if (!errors.isEmpty()) {
     return res

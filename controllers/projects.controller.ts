@@ -3,8 +3,13 @@ import { Project, Client, User } from '../models/index.js'
 import mongoose from 'mongoose'
 import { serverResponse } from '../util/response.js'
 import { apiMessages } from '../config/messages.js'
+import { Request, Response, NextFunction } from 'express'
 
-export const createProject = async (req, res, next) => {
+export const createProject = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
   const errors = validationResult(req)
   if (!errors.isEmpty()) {
     return res
@@ -19,7 +24,7 @@ export const createProject = async (req, res, next) => {
     const client = await Client.findById(req.body.client)
 
     const userIds = req.body.projectTeam.members.map(
-      (memberId) => new mongoose.Types.ObjectId(memberId),
+      (memberId: string) => new mongoose.Types.ObjectId(memberId),
     )
     const users = await User.find({ _id: { $in: userIds } })
 
