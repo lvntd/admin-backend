@@ -20,11 +20,12 @@ import {
 } from './routes/index.js'
 import { userRoutes } from './routes/users.routes.js'
 import { serverResponse } from './util/response.js'
+import { apiMessages } from './config/messages.js'
 
 const __filename = fileURLToPath(import.meta.url) // get the resolved path to the file
 const __dirname = path.dirname(__filename)
 
-const MONGODB_URI = `mongodb+srv://${process.env.MONGO_USER}:${process.env.MONGO_PASSWORD}@cluster0.hzpvtnv.mongodb.net/?retryWrites=true&w=majority`
+const MONGODB_URI = `mongodb+srv://levanted:CIhduU3HxEC0f4r8@cluster0.hzpvtnv.mongodb.net/?retryWrites=true&w=majority`
 
 const MongoDBStore = connectSession(session)
 
@@ -60,7 +61,7 @@ app.use('/projects', projectRoutes)
 // Error handlers
 app.use(get404)
 app.use((error: Error, _req: Request, res: Response, _next: NextFunction) => {
-  serverResponse.sendError(res, error)
+  serverResponse.sendError(res, apiMessages.INTERNAL_SERVER_ERROR)
 })
 
 mongoose

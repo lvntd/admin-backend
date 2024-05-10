@@ -1,9 +1,17 @@
 {
     "env": {
-        "FRONTEND_URL": "http://localhost:3000",
-        "JWT_SECRET": "1gZQKdBwuDeVrBkTbGXQnwWm3jtyGqeflQrg",
-        "MONGO_PASSWORD": "CIhduU3HxEC0f4r8",
-        "MONGO_USER": "levanted",
-        "PORT": 3002
-    }
-}
+      "FRONTEND_URL": "http://localhost:3000",
+      "JWT_SECRET": "1gZQKdBwuDeVrBkTbGXQnwWm3jtyGqeflQrg",
+      "MONGO_PASSWORD": "CIhduU3HxEC0f4r8",
+      "MONGO_USER": "levanted",
+      "PORT": 3002
+    },
+    "exec": "ts-node ./src/app.ts",
+    "ext": "ts",
+    "ignore": [
+      "src/**/*.test.ts"
+    ],
+    "watch": [
+      "src"
+    ]
+  }

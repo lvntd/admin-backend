@@ -5,7 +5,6 @@ import {
   createNewUser,
   deleteClient,
   editUser,
-  getClient,
   getUser,
   getUsers,
 } from '../controllers/index.js'
