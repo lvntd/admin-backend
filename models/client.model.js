@@ -9,7 +9,7 @@ const clientSchema = new Schema(
       required: true,
     },
     taxId: {
-      type: Number,
+      type: String,
       required: true,
       unique: true,
     },

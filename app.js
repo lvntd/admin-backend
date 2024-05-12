@@ -20,6 +20,7 @@ import {
 } from './routes/index.js'
 import { userRoutes } from './routes/users.routes.js'
 import { serverResponse } from './util/response.js'
+import { apiMessages } from './config/messages.js'
 
 const __filename = fileURLToPath(import.meta.url) // get the resolved path to the file
 const __dirname = path.dirname(__filename)
@@ -59,8 +60,8 @@ app.use('/projects', projectRoutes)
 
 // Error handlers
 app.use(get404)
-app.use((error, _req, res, _next) => {
-  serverResponse.sendError(res, error)
+app.use((_error, _req, res, _next) => {
+  serverResponse.sendError(res, apiMessages.INTERNAL_SERVER_ERROR)
 })
 
 mongoose

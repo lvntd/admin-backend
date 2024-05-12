@@ -11,7 +11,7 @@ const projectSchema = new Schema(
     pricing: {
       currency: { type: String, enum: ['GEL', 'USD', 'EUR'], required: true },
       amount: { type: Number, required: true },
-      period: {
+      paymentPeriod: {
         type: String,
         enum: ['ONE_OFF', 'MONTHLY', 'HOURLY'],
         required: true,
