@@ -1,6 +1,6 @@
-import { validationResult } from 'express-validator'
-import { Project, Client, User } from '../models/index.js'
 import mongoose from 'mongoose'
+import { validationResult } from 'express-validator'
+import { Project, User } from '../models/index.js'
 import { serverResponse } from '../util/response.js'
 import { apiMessages } from '../config/messages.js'
 
@@ -15,26 +15,11 @@ export const createProject = async (req, res, next) => {
   try {
     const newProject = new Project(req.body)
     const project = await newProject.save()
-    const client = await Client.findById(req.body.client)
-
-    const userIds = req.body.projectTeam.members.map(
-      (memberId) => new mongoose.Types.ObjectId(memberId),
-    )
-    const users = await User.find({ _id: { $in: userIds } })
-
-    users.forEach((user) => {
-      user.projects.push(project._id)
-      user.save()
-    })
-
-    if (client) {
-      client.projects.push(project._id)
-      client.save()
-    }
 
     // @ts-ignore
     serverResponse.sendSuccess(res, apiMessages.SUCCESSFUL, project)
   } catch (err) {
+    console.log(err)
     // Check to ensure no response has been sent
     if (!res.headersSent) {
       return next(err)
@@ -64,6 +49,8 @@ export const getProjects = async (req, res, next) => {
   try {
     const totalItems = await Project.find(query).countDocuments()
     const items = await Project.find(query)
+      .populate('projectTeam')
+      .populate('client')
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(perPage)
@@ -84,6 +71,77 @@ export const getProjects = async (req, res, next) => {
     console.log(err)
     const error = new Error(err)
     error.message = 'Could not get users'
+    return next(error)
+  }
+}
+
+export const getProject = async (req, res, next) => {
+  const errors = validationResult(req)
+
+  if (!errors.isEmpty()) {
+    return res.status(400).json({ message: errors.array() })
+  }
+
+  const projectId = req.params.projectId
+
+  try {
+    const project = await Project.findById(projectId)
+      .populate('client')
+      .populate('projectTeam')
+
+    return res.status(200).json({ data: project })
+  } catch (err) {
+    console.log(err)
+    const error = new Error(err)
+    error.message = `Could not find project ${projectId}`
+    return next(error)
+  }
+}
+
+export const deleteProject = async (req, res, next) => {
+  const errors = validationResult(req)
+
+  if (!errors.isEmpty()) {
+    return res.status(400).json({ message: errors.array() })
+  }
+
+  const projectId = req.params.projectId
+
+  try {
+    await Project.deleteOne({ _id: projectId })
+
+    res.status(200).json({ message: 'Successfully deleted' })
+  } catch (err) {
+    const error = new Error(err)
+    error.message = `Could not delete project ${projectId}`
+    return next(error)
+  }
+}
+
+export const editProject = async (req, res, next) => {
+  const errors = validationResult(req)
+
+  if (!errors.isEmpty()) {
+    return res.status(400).json({ message: errors.array() })
+  }
+
+  const { projectId } = req.params
+
+  try {
+    const updatedProject = await Project.findOneAndUpdate(
+      { _id: projectId },
+      {
+        $set: { ...req.body },
+      },
+      { new: true },
+    )
+
+    return res
+      .status(200)
+      .json({ message: 'Project was updated', data: updatedProject })
+  } catch (err) {
+    const error = new Error(err)
+    error.message = `Could not update user: ${projectId}`
     return next(error)
   }
 }

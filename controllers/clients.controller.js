@@ -125,7 +125,7 @@ export const getClient = async (req, res, next) => {
   const clientId = req.params.clientId
 
   try {
-    const client = Client.findById(clientId)
+    const client = await Client.findById(clientId)
     return res.status(200).json({ data: client })
   } catch (err) {
     const error = new Error(err)
