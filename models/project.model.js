@@ -6,6 +6,7 @@ const Schema = mongoose.Schema
 
 const projectSchema = new Schema(
   {
+    name: { type: String, required: true },
     client: { type: mongoose.Schema.Types.ObjectId, ref: 'Client' },
     startDate: { type: Date },
     endDate: { type: Date },
