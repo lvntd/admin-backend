@@ -39,7 +39,7 @@ export const getProjects = async (req, res, next) => {
   const skip = (page - 1) * perPage
 
   // Search params
-  const { active, status } = req.query
+  const { active, status, direction, sort } = req.query
 
   const query = {}
   if (active) {
@@ -55,7 +55,7 @@ export const getProjects = async (req, res, next) => {
     const items = await Project.find(query)
       .populate('projectTeam')
       .populate('client')
-      .sort({ createdAt: -1 })
+      .sort({ [sort]: direction === 'desc' ? -1 : 1 })
       .skip(skip)
       .limit(perPage)
 
