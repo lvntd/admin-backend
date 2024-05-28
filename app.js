@@ -22,6 +22,8 @@ import { serverResponse } from './util/response.js'
 import { apiMessages } from './config/messages.js'
 import 'dotenv/config'
 
+// test
+
 const __filename = fileURLToPath(import.meta.url) // get the resolved path to the file
 const __dirname = path.dirname(__filename)
 
