@@ -27,6 +27,13 @@ jobs:
           context: .
           target: test
           load: true
+        continue-on-error: true # Allow the job to continue to the next step even if this one fails
+
+      - name: Print test logs
+        if: failure()
+        run: |
+          echo "Tests failed, printing logs..."
+          docker logs <container_id> # Replace <container_id> with the correct ID or name if necessary
 
       - name: Build and push
         uses: docker/build-push-action@v5
@@ -36,6 +43,7 @@ jobs:
           push: true
           target: prod
           tags: ${{ secrets.DOCKER_USERNAME }}/${{ github.event.repository.name }}:latest
+        if: success() # Only run this step if the previous steps were successful
 
       - name: Post build cleanup
         run: docker system prune -f

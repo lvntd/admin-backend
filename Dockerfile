@@ -13,7 +13,7 @@ RUN npm ci
 
 # Copy the source files and run tests
 COPY . .
-RUN npm test
+RUN npm test || { echo 'Tests failed'; exit 1; }
 
 # Stage 2: Build the production image
 FROM node:${NODE_VERSION}-alpine AS prod
