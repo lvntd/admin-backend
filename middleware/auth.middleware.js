@@ -8,7 +8,7 @@ export const requireAuth = (req, res, next) => {
   if (token) {
     jwt.verify(token, jwtSecret, (err, decodedToken) => {
       if (err) {
-        res.status(403).json({ message: 'Not logged in' })
+        res.status(403).json({ message: 'Not logged in 1' })
       } else {
         console.log({ decodedToken })
         next()
@@ -16,5 +16,5 @@ export const requireAuth = (req, res, next) => {
     })
     return
   }
-  res.status(403).json({ message: 'Not logged in' })
+  res.status(403).json({ message: 'Not logged in 2' })
 }
