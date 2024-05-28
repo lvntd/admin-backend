@@ -4,10 +4,9 @@ import mongoose from 'mongoose'
 import session from 'express-session'
 import cors from 'cors'
 import path from 'path'
-import fs from 'fs'
 import bodyParser from 'body-parser'
 import helmet from 'helmet'
-import morgan from 'morgan'
+// import morgan from 'morgan'
 import cookieParser from 'cookie-parser'
 import { get404 } from './controllers/index.js'
 import socketIo from './socket.js'
@@ -21,6 +20,7 @@ import {
 import { userRoutes } from './routes/users.routes.js'
 import { serverResponse } from './util/response.js'
 import { apiMessages } from './config/messages.js'
+import 'dotenv/config'
 
 const __filename = fileURLToPath(import.meta.url) // get the resolved path to the file
 const __dirname = path.dirname(__filename)
@@ -35,15 +35,15 @@ new MongoDBStore({
   collection: 'sessions',
 })
 
-const accessLogStream = fs.createWriteStream(
-  path.join(__dirname, 'access.log'),
-  { flags: 'a' },
-)
+// const accessLogStream = fs.createWriteStream(
+//   path.join(__dirname, 'access.log'),
+//   { flags: 'a' },
+// )
 
 // Middlewares
 app.use(cors())
 app.use(helmet())
-app.use(morgan('combined', { stream: accessLogStream }))
+// app.use(morgan('combined', { stream: accessLogStream }))
 app.use(bodyParser.urlencoded({ extended: false }))
 app.use(bodyParser.json())
 app.use(cookieParser())

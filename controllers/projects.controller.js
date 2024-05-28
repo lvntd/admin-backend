@@ -39,7 +39,7 @@ export const getProjects = async (req, res, next) => {
   const skip = (page - 1) * perPage
 
   // Search params
-  const { active, status, direction, sort } = req.query
+  const { active, status, direction = 'desc', sort = 'createdAt' } = req.query
 
   const query = {}
   if (active) {
