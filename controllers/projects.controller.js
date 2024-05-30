@@ -39,7 +39,15 @@ export const getProjects = async (req, res, next) => {
   const skip = (page - 1) * perPage
 
   // Search params
-  const { active, status, direction = 'desc', sort = 'createdAt' } = req.query
+  const {
+    active,
+    status,
+    direction = 'desc',
+    sort = 'createdAt',
+    searchValue,
+    client,
+    user,
+  } = req.query
 
   const query = {}
   if (active) {
@@ -48,6 +56,18 @@ export const getProjects = async (req, res, next) => {
 
   if (status) {
     query.status = status
+  }
+
+  if (client) {
+    query.client = client
+  }
+
+  if (user) {
+    query.projectTeam = { $in: [user] }
+  }
+
+  if (searchValue && searchValue.length > 3) {
+    query.name = { $regex: searchValue, $options: 'i' }
   }
 
   try {
