@@ -129,7 +129,9 @@ export const getUser = async (req, res, next) => {
 
   try {
     const user = await User.findById(userId, { password: 0 })
-    return res.status(200).json({ data: user })
+    if (user) {
+      return res.status(200).json({ data: user })
+    }
   } catch (err) {
     console.log(err)
     const error = new Error(err)
