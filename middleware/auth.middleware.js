@@ -10,7 +10,6 @@ export const requireAuth = (req, res, next) => {
       if (err) {
         res.status(403).json({ message: 'Not logged in 1' })
       } else {
-        console.log({ decodedToken })
         next()
       }
     })

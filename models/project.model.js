@@ -54,9 +54,61 @@ projectSchema.post('save', async (doc) => {
 })
 
 projectSchema.pre('findOneAndUpdate', async function (next) {
-  console.log(this)
-  // TODO. update project in client and users
+  const docToUpdate = await this.model.findOne(this.getQuery())
+
+  this._originalProjectTeam = docToUpdate.projectTeam
+  this._originalClient = docToUpdate.client
+
   next()
+})
+
+projectSchema.post('findOneAndUpdate', async function (doc) {
+  if (!doc) return
+
+  const originalProjectTeam = this._originalProjectTeam || []
+  const updatedProjectTeam = doc.projectTeam
+
+  // Find added and removed users
+  const addedUsers = updatedProjectTeam.filter(
+    (id) => !originalProjectTeam.includes(id),
+  )
+  const removedUsers = originalProjectTeam.filter(
+    (id) => !updatedProjectTeam.includes(id),
+  )
+
+  // Update added users
+  if (addedUsers.length > 0) {
+    await User.updateMany(
+      { _id: { $in: addedUsers } },
+      { $addToSet: { projects: doc._id } },
+    )
+  }
+
+  // Update removed users
+  if (removedUsers.length > 0) {
+    await User.updateMany(
+      { _id: { $in: removedUsers } },
+      { $pull: { projects: doc._id } },
+    )
+  }
+
+  const originalClient = this._originalClient
+  const updatedClient = doc.client
+
+  console.log({ originalClient, updatedClient })
+
+  if (originalClient !== updatedClient) {
+    await Promise.all([
+      Client.findOneAndUpdate(
+        { _id: originalClient },
+        { $pull: { projects: doc._id } },
+      ),
+      Client.findOneAndUpdate(
+        { _id: updatedClient },
+        { $addToSet: { projects: doc._id } },
+      ),
+    ])
+  }
 })
 
 projectSchema.pre('deleteOne', async function (next) {

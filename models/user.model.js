@@ -49,7 +49,7 @@ userSchema.statics.login = async function (email, password) {
   if (user) {
     // @ts-ignore
     const auth = await bcrypt.compare(password, user.password)
-    console.log({ auth })
+
     if (auth) {
       return user
     }
