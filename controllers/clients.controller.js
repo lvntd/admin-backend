@@ -82,11 +82,15 @@ export const getClients = async (req, res, next) => {
   let totalItems = 0
 
   // Search params
-  const active = req.query.active
+  const { active, onlyWithProjects } = req.query
 
   const query = {}
   if (active) {
     query.active = active
+  }
+
+  if (onlyWithProjects === 'true') {
+    query.projects = { $exists: true, $not: { $size: 0 } }
   }
 
   try {

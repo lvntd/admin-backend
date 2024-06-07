@@ -84,11 +84,15 @@ export const getUsers = async (req, res, next) => {
   const skip = (page - 1) * perPage
 
   // Search params
-  const active = req.query.active
+  const { active, onlyWithProjects } = req.query
 
   const query = {}
   if (active) {
     query.active = active
+  }
+
+  if (onlyWithProjects === 'true') {
+    query.projects = { $exists: true, $not: { $size: 0 } }
   }
 
   try {

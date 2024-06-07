@@ -6,7 +6,6 @@ import cors from 'cors'
 import path from 'path'
 import bodyParser from 'body-parser'
 import helmet from 'helmet'
-// import morgan from 'morgan'
 import cookieParser from 'cookie-parser'
 import { get404 } from './controllers/index.js'
 import socketIo from './socket.js'
@@ -37,15 +36,9 @@ new MongoDBStore({
   collection: 'sessions',
 })
 
-// const accessLogStream = fs.createWriteStream(
-//   path.join(__dirname, 'access.log'),
-//   { flags: 'a' },
-// )
-
 // Middlewares
 app.use(cors())
 app.use(helmet())
-// app.use(morgan('combined', { stream: accessLogStream }))
 app.use(bodyParser.urlencoded({ extended: false }))
 app.use(bodyParser.json())
 app.use(cookieParser())
@@ -69,7 +62,7 @@ app.use((_error, _req, res, _next) => {
 mongoose
   .connect(MONGODB_URI)
   .then(() => {
-    const server = app.listen(process.env.PORT || 3002)
+    const server = app.listen(process.env.PORT || 8080)
 
     const io = socketIo.init(server, {
       cors: { origin: process.env.FRONTEND_URL, methods: ['GET', 'POST'] },

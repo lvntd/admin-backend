@@ -4,6 +4,6 @@
         "JWT_SECRET": "1gZQKdBwuDeVrBkTbGXQnwWm3jtyGqeflQrg",
         "MONGO_PASSWORD": "CIhduU3HxEC0f4r8",
         "MONGO_USER": "levanted",
-        "PORT": 3002
+        "PORT": 8080
     }
 }

@@ -31,7 +31,7 @@ RUN npm ci --omit=dev
 COPY . .
 
 # Expose the port that the application listens on
-EXPOSE 3002
+EXPOSE 8080
 
 # Run the application as a non-root user
 USER node

@@ -1,8 +1,12 @@
 import { validationResult } from 'express-validator'
-import multer from 'multer'
-import { deleteFileFs } from '../util/file.js'
 
-const fileStorage = multer.diskStorage({
+import path from 'path'
+import multer from 'multer'
+import fs from 'fs'
+import { deleteFileFs } from '../util/file.js'
+import { Project } from '../models/project.model.js'
+
+const publicImages = multer.diskStorage({
   destination: (req, file, cb) => {
     cb(null, 'images')
   },
@@ -11,7 +15,7 @@ const fileStorage = multer.diskStorage({
   },
 })
 
-const fileFilter = (req, file, cb) => {
+const imagesFilter = (req, file, cb) => {
   if (
     file.mimetype === 'image/png' ||
     file.mimetype === 'image/jpg' ||
@@ -24,12 +28,12 @@ const fileFilter = (req, file, cb) => {
   }
 }
 
-const upload = multer({
-  storage: fileStorage,
-  fileFilter: fileFilter,
+const uploadPublicImage = multer({
+  storage: publicImages,
+  fileFilter: imagesFilter,
 }).single('file')
 
-export const uploadFile = (req, res, next) => {
+export const uploadImage = (req, res, next) => {
   const errors = validationResult(req)
   if (!errors.isEmpty()) {
     return res
@@ -37,9 +41,9 @@ export const uploadFile = (req, res, next) => {
       .json({ message: 'Validation failed', errors: errors.array() })
   }
 
-  upload(req, res, function (error) {
+  uploadPublicImage(req, res, function (error) {
     if (error) {
-      // Handle the error from the upload process
+      // Handle the error from the uploadPublicImage process
       console.log(error)
       return res.status(422).json({ message: 'Error happened', error: error })
     }
@@ -54,6 +58,69 @@ export const uploadFile = (req, res, next) => {
         .json({ message: 'No file uploaded or file type is incorrect' })
     }
   })
+}
+
+export const uploadDocument = async (req, res, next) => {
+  const errors = validationResult(req)
+  if (!errors.isEmpty()) {
+    return res
+      .status(422)
+      .json({ message: 'Validation failed', errors: errors.array() })
+  }
+
+  const { projectId } = req.params
+
+  try {
+    const project = await Project.findById(projectId)
+    if (project === null) {
+      throw new Error('Project not found')
+      return
+    }
+
+    const storage = multer.diskStorage({
+      destination: (req, file, cb) => {
+        cb(null, 'documents')
+      },
+      filename: (req, file, cb) => {
+        cb(null, `${projectId}_${file.originalname}`)
+      },
+    })
+
+    const fileFilter = (req, file, cb) => {
+      if (file.mimetype === 'application/pdf') {
+        cb(null, true)
+      } else {
+        req.fileValidationError = 'goes wrong on the mimetype'
+        cb(null, false)
+      }
+    }
+
+    const uploadPrivateDocument = multer({
+      storage,
+      fileFilter,
+    }).single('file')
+
+    uploadPrivateDocument(req, res, function (error) {
+      if (error) {
+        // Handle the error from the uploadPublicImage process
+        console.log(error)
+        return res.status(422).json({ message: 'Error happened', error: error })
+      }
+
+      // Only attempt to send the file path if the file is successfully uploaded
+      if (req.file) {
+        res.status(200).json({ url: req.file.path })
+      } else {
+        // Handle cases where no file is uploaded due to fileFilter restrictions or other issues
+        res
+          .status(400)
+          .json({ message: 'No file uploaded or file type is incorrect' })
+      }
+    })
+  } catch (err) {
+    console.log(err)
+    return next(err)
+  }
 }
 
 export const deleteFile = (req, res, next) => {
@@ -72,4 +139,26 @@ export const deleteFile = (req, res, next) => {
       res.status(200).json({ message: 'Image deleted successfully' })
     }
   })
+}
+
+export const getDocument = async (req, res, next) => {
+  const errors = validationResult(req)
+  if (!errors.isEmpty()) {
+    return res
+      .status(422)
+      .json({ message: 'Validation failed', errors: errors.array() })
+  }
+
+  const filePath = req.query.filePath
+
+  try {
+    const absolutePath = path.resolve(filePath)
+    res.sendFile(absolutePath, (err) => {
+      if (err) {
+        next(err)
+      }
+    })
+  } catch (error) {
+    res.status(500).json({ message: 'Error retrieving file', error })
+  }
 }
