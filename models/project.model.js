@@ -95,8 +95,6 @@ projectSchema.post('findOneAndUpdate', async function (doc) {
   const originalClient = this._originalClient
   const updatedClient = doc.client
 
-  console.log({ originalClient, updatedClient })
-
   if (originalClient !== updatedClient) {
     await Promise.all([
       Client.findOneAndUpdate(
