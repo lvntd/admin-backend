@@ -87,12 +87,19 @@ export const uploadDocument = async (req, res, next) => {
     })
 
     const fileFilter = (req, file, cb) => {
-      if (file.mimetype === 'application/pdf') {
-        cb(null, true)
-      } else {
-        req.fileValidationError = 'goes wrong on the mimetype'
-        cb(null, false)
+      var filetypes = /doc|docx|pdf|xls|xlsx|txt/
+      var mimetype = filetypes.test(file.mimetype)
+      var extname = filetypes.test(
+        path.extname(file.originalname).toLowerCase(),
+      )
+
+      if (mimetype && extname) {
+        return cb(null, true)
       }
+      cb(
+        'Error: File upload only supports the following filetypes - ' +
+          filetypes,
+      )
     }
 
     const uploadPrivateDocument = multer({

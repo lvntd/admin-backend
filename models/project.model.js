@@ -27,6 +27,7 @@ const projectSchema = new Schema(
       enum: ['NOT_STARTED', 'IN_PROGRESS', 'COMPLETED', 'POTENTIAL'],
       required: true,
     },
+    documents: [{ type: mongoose.Schema.Types.ObjectId, ref: 'ProjectDoc' }],
   },
   { timestamps: true },
 )
@@ -95,7 +96,9 @@ projectSchema.post('findOneAndUpdate', async function (doc) {
   const originalClient = this._originalClient
   const updatedClient = doc.client
 
-  if (originalClient !== updatedClient) {
+  console.log({ originalClient, updatedClient })
+
+  if (updatedClient && originalClient !== updatedClient) {
     await Promise.all([
       Client.findOneAndUpdate(
         { _id: originalClient },

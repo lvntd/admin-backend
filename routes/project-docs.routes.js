@@ -1,12 +1,5 @@
 import express from 'express'
 import { requireAuth } from '../middleware/auth.middleware.js'
-import {
-  createProject,
-  deleteProject,
-  editProject,
-  getProject,
-  getProjects,
-} from '../controllers/index.js'
 import { param } from 'express-validator'
 import {
   createProjectDoc,
@@ -14,27 +7,27 @@ import {
   getProjectDocs,
 } from '../controllers/project-docs.controller.js'
 
-const projectRoutes = express.Router()
+const projectDocRoutes = express.Router()
 
-projectRoutes.post('/', requireAuth, createProject)
-projectRoutes.get('/', requireAuth, getProjects)
-projectRoutes.get(
+projectDocRoutes.post(
   '/:projectId',
   requireAuth,
   param('projectId', 'projectId is required variable in path').notEmpty(),
-  getProject,
-)
-projectRoutes.delete(
-  '/:projectId',
-  requireAuth,
-  param('projectId', 'projectId is required variable in path').notEmpty(),
-  deleteProject,
-)
-projectRoutes.put(
-  '/:projectId',
-  requireAuth,
-  param('projectId', 'projectId is required variable in path').notEmpty(),
-  editProject,
+  createProjectDoc,
 )
 
-export { projectRoutes }
+projectDocRoutes.get(
+  '/:projectId',
+  requireAuth,
+  param('projectId', 'projectId is required variable in path').notEmpty(),
+  getProjectDocs,
+)
+
+projectDocRoutes.delete(
+  '/:documentId',
+  requireAuth,
+  param('documentId', 'documentId is required variable in path').notEmpty(),
+  deleteProjectDoc,
+)
+
+export { projectDocRoutes }

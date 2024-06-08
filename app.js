@@ -20,6 +20,7 @@ import { userRoutes } from './routes/users.routes.js'
 import { serverResponse } from './util/response.js'
 import { apiMessages } from './config/messages.js'
 import 'dotenv/config'
+import { projectDocRoutes } from './routes/project-docs.routes.js'
 
 // tes
 
@@ -52,6 +53,7 @@ app.use('/clients', clientRoutes)
 app.use('/auth', authRoutes)
 app.use('/files', filesRoutes)
 app.use('/projects', projectRoutes)
+app.use('/project-docs', projectDocRoutes)
 
 // Error handlers
 app.use(get404)
