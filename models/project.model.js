@@ -96,19 +96,21 @@ projectSchema.post('findOneAndUpdate', async function (doc) {
   const originalClient = this._originalClient
   const updatedClient = doc.client
 
-  console.log({ originalClient, updatedClient })
-
-  if (updatedClient && originalClient !== updatedClient) {
-    await Promise.all([
-      Client.findOneAndUpdate(
-        { _id: originalClient },
-        { $pull: { projects: doc._id } },
-      ),
-      Client.findOneAndUpdate(
-        { _id: updatedClient },
-        { $addToSet: { projects: doc._id } },
-      ),
-    ])
+  if (updatedClient && !originalClient.equals(updatedClient)) {
+    try {
+      await Promise.all([
+        Client.findOneAndUpdate(
+          { _id: originalClient },
+          { $pull: { projects: doc._id } },
+        ),
+        Client.findOneAndUpdate(
+          { _id: updatedClient },
+          { $addToSet: { projects: doc._id } },
+        ),
+      ])
+    } catch (err) {
+      console.log(err)
+    }
   }
 })
 
