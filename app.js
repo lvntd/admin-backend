@@ -18,7 +18,7 @@ import {
 } from './routes/index.js'
 import { userRoutes } from './routes/users.routes.js'
 import { serverResponse } from './util/response.js'
-import { apiMessages } from './config/messages.js'
+
 import 'dotenv/config'
 import { projectDocRoutes } from './routes/project-docs.routes.js'
 import { StatusCodes } from 'http-status-codes'
@@ -59,6 +59,7 @@ app.use('/project-docs', projectDocRoutes)
 // Error handlers
 app.use(get404)
 app.use((error, _req, res, _next) => {
+  console.log(error)
   serverResponse.sendError(res, {
     code: StatusCodes.INTERNAL_SERVER_ERROR,
     success: false,

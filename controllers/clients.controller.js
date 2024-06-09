@@ -1,8 +1,7 @@
 import { validationResult } from 'express-validator'
 import { Client } from '../models/index.js'
-import io from '../socket.js'
 import { serverResponse } from '../util/response.js'
-import { apiMessages } from '../config/messages.js'
+import { StatusCodes } from 'http-status-codes'
 
 export const addClient = async (req, res, next) => {
   const errors = validationResult(req)
@@ -17,7 +16,12 @@ export const addClient = async (req, res, next) => {
   try {
     const existingClient = await Client.findOne({ taxId })
     if (existingClient) {
-      return serverResponse.sendError(res, apiMessages.ALREADY_EXIST)
+      return serverResponse.sendError(res, {
+        code: StatusCodes.BAD_REQUEST,
+        success: false,
+        message: 'error_client_already_exists',
+        details: null,
+      })
     }
 
     const newClient = new Client({
@@ -31,12 +35,10 @@ export const addClient = async (req, res, next) => {
 
     if (client) {
       // @ts-ignore
-      return serverResponse.sendSuccess(res, apiMessages.SUCCESSFUL, client)
+      return serverResponse.sendSuccess(res, client)
     }
-  } catch (err) {
-    if (!res.headersSent) {
-      return next(err)
-    }
+  } catch (error) {
+    return next(error)
   }
 }
 
@@ -59,8 +61,8 @@ export const editClient = async (req, res, next) => {
     )
 
     return serverResponse.sendSuccess(res, updatedClient)
-  } catch (err) {
-    return next(err)
+  } catch (error) {
+    return next(error)
   }
 }
 
@@ -99,9 +101,7 @@ export const getClients = async (req, res, next) => {
       lastPage: Math.ceil(totalItems / perPage),
       perPage: perPage,
     })
-  } catch (err) {
-    const error = new Error(err)
-    error.message = 'Could not get clients'
+  } catch (error) {
     return next(error)
   }
 }
@@ -117,10 +117,8 @@ export const getClient = async (req, res, next) => {
 
   try {
     const client = await Client.findById(clientId)
-    return res.status(200).json({ data: client })
-  } catch (err) {
-    const error = new Error(err)
-    error.message = `Could not find client ${clientId}`
+    return serverResponse.sendSuccess(res, client)
+  } catch (error) {
     return next(error)
   }
 }
@@ -137,10 +135,8 @@ export const deleteClient = async (req, res, next) => {
   try {
     await Client.deleteOne({ _id: clientId })
 
-    res.status(200).json({ message: 'Successfully deleted' })
-  } catch (err) {
-    const error = new Error(err)
-    error.message = `Could not delete client ${clientId}`
+    return serverResponse.sendSuccess(res, null, 'alert_client_was_deleted')
+  } catch (error) {
     return next(error)
   }
 }

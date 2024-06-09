@@ -2,7 +2,6 @@ import mongoose from 'mongoose'
 import { validationResult } from 'express-validator'
 import { Project, User } from '../models/index.js'
 import { serverResponse } from '../util/response.js'
-import { apiMessages } from '../config/messages.js'
 
 export const createProject = async (req, res, next) => {
   const errors = validationResult(req)
@@ -17,13 +16,9 @@ export const createProject = async (req, res, next) => {
     const project = await newProject.save()
 
     // @ts-ignore
-    serverResponse.sendSuccess(res, apiMessages.SUCCESSFUL, project)
-  } catch (err) {
-    console.log(err)
-    // Check to ensure no response has been sent
-    if (!res.headersSent) {
-      return next(err)
-    }
+    serverResponse.sendSuccess(res, project)
+  } catch (error) {
+    return next(error)
   }
 }
 
@@ -91,10 +86,7 @@ export const getProjects = async (req, res, next) => {
       lastPage: Math.ceil(totalItems / perPage),
       perPage: perPage,
     })
-  } catch (err) {
-    console.log(err)
-    const error = new Error(err)
-    error.message = 'Could not get users'
+  } catch (error) {
     return next(error)
   }
 }
@@ -113,11 +105,8 @@ export const getProject = async (req, res, next) => {
       .populate('client')
       .populate('projectTeam')
 
-    return res.status(200).json({ data: project })
-  } catch (err) {
-    console.log(err)
-    const error = new Error(err)
-    error.message = `Could not find project ${projectId}`
+    return serverResponse.sendSuccess(res, project)
+  } catch (error) {
     return next(error)
   }
 }
@@ -134,10 +123,8 @@ export const deleteProject = async (req, res, next) => {
   try {
     await Project.deleteOne({ _id: projectId })
 
-    res.status(200).json({ message: 'Successfully deleted' })
-  } catch (err) {
-    const error = new Error(err)
-    error.message = `Could not delete project ${projectId}`
+    return serverResponse.sendSuccess(res, null, 'alert_project_was_deleted')
+  } catch (error) {
     return next(error)
   }
 }
@@ -160,12 +147,8 @@ export const editProject = async (req, res, next) => {
       { new: true },
     )
 
-    return res
-      .status(200)
-      .json({ message: 'Project was updated', data: updatedProject })
-  } catch (err) {
-    const error = new Error(err)
-    error.message = `Could not update user: ${projectId}`
+    return serverResponse.sendSuccess(res, updatedProject)
+  } catch (error) {
     return next(error)
   }
 }

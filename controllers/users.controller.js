@@ -6,21 +6,19 @@ import { serverResponse } from '../util/response.js'
 import { StatusCodes } from 'http-status-codes'
 
 export const createNewUser = async (req, res, next) => {
-  const errors = validationResult(req)
-  if (!errors.isEmpty()) {
-    return res
-      .status(422)
-      .json({ message: 'Validation failed', errors: errors.array() })
-  }
+  // Validated with zod
 
   const { email } = req.body
 
   try {
     const existingUser = await User.findOne({ email })
     if (existingUser) {
-      return res
-        .status(400)
-        .json({ message: `User already exists with this id ${email}` })
+      return serverResponse.sendError(res, {
+        code: StatusCodes.BAD_REQUEST,
+        success: false,
+        message: 'error_user_already_exists',
+        details: existingUser,
+      })
     }
 
     const defaultPassword = 'Test123123' // TODO. generate and send by email
@@ -32,9 +30,7 @@ export const createNewUser = async (req, res, next) => {
     const user = await newUser.save()
 
     if (user) {
-      return res
-        .status(201)
-        .json({ message: 'User created successfully', data: user })
+      return serverResponse.sendSuccess(res, user)
     }
   } catch (err) {
     serverResponse.sendError({
@@ -50,6 +46,7 @@ export const editUser = async (req, res, next) => {
   const errors = validationResult(req)
 
   if (!errors.isEmpty()) {
+    // validate userId in path
     return res.status(400).json({ message: errors.array() })
   }
 
@@ -64,23 +61,13 @@ export const editUser = async (req, res, next) => {
       { new: true },
     )
 
-    return res
-      .status(200)
-      .json({ message: 'User was updated', data: updatedUser })
-  } catch (err) {
-    const error = new Error(err)
-    error.message = `Could not update user: ${userId}`
+    return serverResponse.sendSuccess(res, updatedUser)
+  } catch (error) {
     return next(error)
   }
 }
 
 export const getUsers = async (req, res, next) => {
-  const errors = validationResult(req)
-
-  if (!errors.isEmpty()) {
-    return res.status(400).json({ message: errors.array() })
-  }
-
   const page = Number(req.query.page)
   const perPage = Number(req.query.perPage) || 5
   const skip = (page - 1) * perPage
@@ -104,6 +91,7 @@ export const getUsers = async (req, res, next) => {
       .skip(skip)
       .limit(perPage)
 
+    // TODO. refactor serverResponse.sendSuccess to allow sending data with pagination
     return res.status(200).json({
       message: 'Success',
       data: users,
@@ -116,10 +104,7 @@ export const getUsers = async (req, res, next) => {
       lastPage: Math.ceil(totalItems / perPage),
       perPage: perPage,
     })
-  } catch (err) {
-    console.log(err)
-    const error = new Error(err)
-    error.message = 'Could not get users'
+  } catch (error) {
     return next(error)
   }
 }
@@ -136,12 +121,9 @@ export const getUser = async (req, res, next) => {
   try {
     const user = await User.findById(userId, { password: 0 })
     if (user) {
-      return res.status(200).json({ data: user })
+      return serverResponse.sendSuccess(res, user)
     }
-  } catch (err) {
-    console.log(err)
-    const error = new Error(err)
-    error.message = `Could not find user: ${userId}`
+  } catch (error) {
     return next(error)
   }
 }
@@ -158,10 +140,8 @@ export const deleteUser = async (req, res, next) => {
   try {
     await User.deleteOne({ _id: userId })
 
-    res.status(200).json({ message: 'Successfully deleted' })
-  } catch (err) {
-    const error = new Error(err)
-    error.message = `Could not delete user ${userId}`
+    serverResponse.sendSuccess(res, 'alert_user_was_deleted')
+  } catch (error) {
     return next(error)
   }
 }

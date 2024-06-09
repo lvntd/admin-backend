@@ -1,7 +1,6 @@
 import mongoose from 'mongoose'
 import { validationResult } from 'express-validator'
 import { serverResponse } from '../util/response.js'
-import { apiMessages } from '../config/messages.js'
 import { ProjectDoc } from '../models/project-doc.model.js'
 
 export const createProjectDoc = async (req, res, next) => {
@@ -19,13 +18,9 @@ export const createProjectDoc = async (req, res, next) => {
     const projectDoc = await newProjectDoc.save()
 
     // @ts-ignore
-    serverResponse.sendSuccess(res, apiMessages.SUCCESSFUL, projectDoc)
-  } catch (err) {
-    console.log(err)
-    // Check to ensure no response has been sent
-    if (!res.headersSent) {
-      return next(err)
-    }
+    serverResponse.sendSuccess(res, projectDoc)
+  } catch (error) {
+    return next(error)
   }
 }
 
@@ -64,10 +59,7 @@ export const getProjectDocs = async (req, res, next) => {
       lastPage: Math.ceil(totalItems / perPage),
       perPage: perPage,
     })
-  } catch (err) {
-    console.log(err)
-    const error = new Error(err)
-    error.message = 'Could not get project docs'
+  } catch (error) {
     return next(error)
   }
 }
@@ -84,10 +76,8 @@ export const deleteProjectDoc = async (req, res, next) => {
   try {
     await ProjectDoc.deleteOne({ _id: documentId })
 
-    res.status(200).json({ message: 'Successfully deleted' })
-  } catch (err) {
-    const error = new Error(err)
-    error.message = `Could not delete project document ${documentId}`
+    return serverResponse.sendSuccess(res, null, 'alert_document_was_deleted')
+  } catch (error) {
     return next(error)
   }
 }

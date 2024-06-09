@@ -149,7 +149,7 @@ export const deleteFile = (req, res, next) => {
         details: error,
       })
     } else {
-      serverResponse.sendSuccess(res, 'alert_file_was_deleted')
+      serverResponse.sendSuccess(res, null, 'alert_file_was_deleted')
     }
   })
 }

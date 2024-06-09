@@ -2,7 +2,6 @@ import { validationResult } from 'express-validator'
 import jwt from 'jsonwebtoken'
 import { User } from '../models/index.js'
 import { serverResponse } from '../util/response.js'
-import { apiMessages } from '../config/messages.js'
 import bcrypt from 'bcrypt'
 import { StatusCodes } from 'http-status-codes'
 
@@ -48,7 +47,7 @@ export const signup = async (req, res, next) => {
     })
 
     // @ts-ignore
-    serverResponse.sendSuccess(res, apiMessages.SUCCESSFUL, user)
+    serverResponse.sendSuccess(res, user)
   } catch (error) {
     next(error)
   }
