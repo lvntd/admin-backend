@@ -15,6 +15,7 @@ export const serverResponse = {
       code: error.code ? error.code : 500,
       success: false,
       message: error.message,
+      detils: error.details || null,
     }
     return res.status(error.code ? error.code : 500).json(responseMessage)
   },

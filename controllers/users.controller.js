@@ -2,6 +2,8 @@ import { validationResult } from 'express-validator'
 import { User } from '../models/index.js'
 import io from '../socket.js'
 import bcrypt from 'bcrypt'
+import { serverResponse } from '../util/response.js'
+import { StatusCodes } from 'http-status-codes'
 
 export const createNewUser = async (req, res, next) => {
   const errors = validationResult(req)
@@ -30,17 +32,17 @@ export const createNewUser = async (req, res, next) => {
     const user = await newUser.save()
 
     if (user) {
-      io.getIO().emit('invalidate', { qk: ['users'] })
       return res
         .status(201)
         .json({ message: 'User created successfully', data: user })
     }
   } catch (err) {
-    if (!res.headersSent) {
-      const error = new Error(err)
-      error.message = 'Could not create user'
-      return next(error)
-    }
+    serverResponse.sendError({
+      code: StatusCodes.INTERNAL_SERVER_ERROR,
+      success: false,
+      message: 'error_internal_server_error',
+      details: null,
+    })
   }
 }
 
@@ -155,7 +157,7 @@ export const deleteUser = async (req, res, next) => {
 
   try {
     await User.deleteOne({ _id: userId })
-    io.getIO().emit('invalidate', { qk: ['users'] })
+
     res.status(200).json({ message: 'Successfully deleted' })
   } catch (err) {
     const error = new Error(err)

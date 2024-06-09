@@ -5,14 +5,14 @@ import {
   createNewUser,
   deleteClient,
   editUser,
-  getClient,
   getUser,
   getUsers,
 } from '../controllers/index.js'
+import { validateData, userSchemaCreate } from '../validations/index.js'
 
 const userRoutes = express.Router()
 
-userRoutes.post('/', requireAuth, createNewUser)
+userRoutes.post('/', requireAuth, validateData(userSchemaCreate), createNewUser)
 userRoutes.get('/', requireAuth, getUsers)
 userRoutes.get(
   '/:userId',

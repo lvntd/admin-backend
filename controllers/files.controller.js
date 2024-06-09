@@ -2,9 +2,10 @@ import { validationResult } from 'express-validator'
 
 import path from 'path'
 import multer from 'multer'
-import fs from 'fs'
 import { deleteFileFs } from '../util/file.js'
 import { Project } from '../models/project.model.js'
+import { serverResponse } from '../util/response.js'
+import { StatusCodes } from 'http-status-codes'
 
 const publicImages = multer.diskStorage({
   destination: (req, file, cb) => {
@@ -34,46 +35,42 @@ const uploadPublicImage = multer({
 }).single('file')
 
 export const uploadImage = (req, res, next) => {
-  const errors = validationResult(req)
-  if (!errors.isEmpty()) {
-    return res
-      .status(422)
-      .json({ message: 'Validation failed', errors: errors.array() })
-  }
-
   uploadPublicImage(req, res, function (error) {
     if (error) {
-      // Handle the error from the uploadPublicImage process
-      console.log(error)
-      return res.status(422).json({ message: 'Error happened', error: error })
+      return serverResponse.sendError(res, {
+        code: StatusCodes.UNPROCESSABLE_ENTITY,
+        success: false,
+        message: 'error_image_upload_failed',
+        details: error,
+      })
     }
 
     // Only attempt to send the file path if the file is successfully uploaded
     if (req.file) {
-      res.status(200).json({ url: req.file.path })
+      serverResponse.sendSuccess(res, { url: req.file.path })
     } else {
       // Handle cases where no file is uploaded due to fileFilter restrictions or other issues
-      res
-        .status(400)
-        .json({ message: 'No file uploaded or file type is incorrect' })
+      serverResponse.sendError(res, {
+        code: StatusCodes.BAD_REQUEST,
+        success: false,
+        message: 'error_image_upload_failed',
+      })
     }
   })
 }
 
 export const uploadDocument = async (req, res, next) => {
-  const errors = validationResult(req)
-  if (!errors.isEmpty()) {
-    return res
-      .status(422)
-      .json({ message: 'Validation failed', errors: errors.array() })
-  }
-
   const { projectId } = req.params
 
   try {
     const project = await Project.findById(projectId)
     if (project === null) {
-      throw new Error('Project not found')
+      serverResponse.sendError({
+        code: StatusCodes.NOT_FOUND,
+        success: false,
+        message: 'error_project_not_found',
+        details: { projectId },
+      })
       return
     }
 
@@ -109,24 +106,28 @@ export const uploadDocument = async (req, res, next) => {
 
     uploadPrivateDocument(req, res, function (error) {
       if (error) {
-        // Handle the error from the uploadPublicImage process
-        console.log(error)
-        return res.status(422).json({ message: 'Error happened', error: error })
+        return serverResponse.sendError(res, {
+          code: StatusCodes.UNPROCESSABLE_ENTITY,
+          success: false,
+          message: 'error_upload_failed',
+          details: error,
+        })
       }
 
       // Only attempt to send the file path if the file is successfully uploaded
       if (req.file) {
-        res.status(200).json({ url: req.file.path })
+        serverResponse.sendSuccess(res, { url: req.file.path })
       } else {
-        // Handle cases where no file is uploaded due to fileFilter restrictions or other issues
-        res
-          .status(400)
-          .json({ message: 'No file uploaded or file type is incorrect' })
+        return serverResponse.sendError(res, {
+          code: StatusCodes.BAD_REQUEST,
+          success: false,
+          message: 'error_upload_failed',
+          details: error,
+        })
       }
     })
-  } catch (err) {
-    console.log(err)
-    return next(err)
+  } catch (error) {
+    return next(error)
   }
 }
 
@@ -141,9 +142,14 @@ export const deleteFile = (req, res, next) => {
   const filePath = req.query.filePath
   deleteFileFs(filePath, (error) => {
     if (error) {
-      res.status(400).json({ message: 'Could not delete image', error: error })
+      serverResponse.sendError(res, {
+        code: StatusCodes.UNPROCESSABLE_ENTITY,
+        success: false,
+        message: 'error_upload_failed',
+        details: error,
+      })
     } else {
-      res.status(200).json({ message: 'Image deleted successfully' })
+      serverResponse.sendSuccess(res, 'alert_file_was_deleted')
     }
   })
 }
@@ -166,6 +172,6 @@ export const getDocument = async (req, res, next) => {
       }
     })
   } catch (error) {
-    res.status(500).json({ message: 'Error retrieving file', error })
+    next(error)
   }
 }

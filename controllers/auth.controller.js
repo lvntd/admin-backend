@@ -4,6 +4,7 @@ import { User } from '../models/index.js'
 import { serverResponse } from '../util/response.js'
 import { apiMessages } from '../config/messages.js'
 import bcrypt from 'bcrypt'
+import { StatusCodes } from 'http-status-codes'
 
 const maxAge = 3 * 24 * 60 * 60
 
@@ -49,7 +50,6 @@ export const signup = async (req, res, next) => {
     // @ts-ignore
     serverResponse.sendSuccess(res, apiMessages.SUCCESSFUL, user)
   } catch (error) {
-    console.log(error)
     next(error)
   }
 }
@@ -78,19 +78,17 @@ export const login = async (req, res, next) => {
 }
 
 export const me = async (req, res, next) => {
-  const errors = validationResult(req)
-  if (!errors.isEmpty()) {
-    return res
-      .status(422)
-      .json({ message: 'Validation failed', errors: errors.array() })
-  }
-
   try {
     const token = req.cookies.accessToken || req.headers.authorization
     const parsedToken = jwt.decode(token)
 
     if (parsedToken === null) {
-      throw Error('User not found')
+      serverResponse.sendError(res, {
+        code: StatusCodes.BAD_REQUEST,
+        success: false,
+        message: 'error_token_not_parsed',
+        details: null,
+      })
     }
 
     // @ts-ignore
@@ -99,7 +97,12 @@ export const me = async (req, res, next) => {
     if (user) {
       res.status(200).json({ accessToken: token, userData: user })
     } else {
-      serverResponse.sendError(res, apiMessages.NOT_FOUND)
+      serverResponse.sendError(res, {
+        code: StatusCodes.NOT_FOUND,
+        success: false,
+        message: 'error_user_not_found',
+        details: null,
+      })
     }
   } catch (error) {
     next(error)

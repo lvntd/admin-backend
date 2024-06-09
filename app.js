@@ -21,6 +21,7 @@ import { serverResponse } from './util/response.js'
 import { apiMessages } from './config/messages.js'
 import 'dotenv/config'
 import { projectDocRoutes } from './routes/project-docs.routes.js'
+import { StatusCodes } from 'http-status-codes'
 
 // tes
 
@@ -57,8 +58,13 @@ app.use('/project-docs', projectDocRoutes)
 
 // Error handlers
 app.use(get404)
-app.use((_error, _req, res, _next) => {
-  serverResponse.sendError(res, apiMessages.INTERNAL_SERVER_ERROR)
+app.use((error, _req, res, _next) => {
+  serverResponse.sendError(res, {
+    code: StatusCodes.INTERNAL_SERVER_ERROR,
+    success: false,
+    message: 'error_internal_server_error',
+    details: error,
+  })
 })
 
 mongoose
