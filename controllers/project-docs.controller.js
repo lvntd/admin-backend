@@ -14,7 +14,10 @@ export const createProjectDoc = async (req, res, next) => {
   const { projectId } = req.params
 
   try {
-    const newProjectDoc = new ProjectDoc({ project: projectId, ...req.body })
+    const newProjectDoc = new ProjectDoc({
+      project: projectId,
+      ...req.body,
+    })
     const projectDoc = await newProjectDoc.save()
 
     // @ts-ignore

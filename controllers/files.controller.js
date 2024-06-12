@@ -116,7 +116,24 @@ export const uploadDocument = async (req, res, next) => {
 
       // Only attempt to send the file path if the file is successfully uploaded
       if (req.file) {
-        serverResponse.sendSuccess(res, { url: req.file.path })
+        const filePath = req.file.originalname
+        const splitByDot = filePath.split('.')
+        const lastElement = splitByDot[splitByDot.length - 1]
+        const type = lastElement.toUpperCase()
+
+        console.log('RES', {
+          path: req.file.path,
+          size: req.file.size,
+          originalName: req.file.originalname,
+          type: type,
+        })
+
+        serverResponse.sendSuccess(res, {
+          path: req.file.path,
+          size: req.file.size,
+          originalName: req.file.originalname,
+          type: type,
+        })
       } else {
         return serverResponse.sendError(res, {
           code: StatusCodes.BAD_REQUEST,
