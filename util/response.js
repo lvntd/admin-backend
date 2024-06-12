@@ -5,6 +5,7 @@ export const serverResponse = {
     return res.status(StatusCodes.OK).json({ data, message })
   },
   sendError: (res, error) => {
+    console.log(error)
     const responseMessage = {
       code: error.code ? error.code : 500,
       success: false,

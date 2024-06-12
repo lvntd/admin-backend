@@ -59,7 +59,6 @@ app.use('/project-docs', projectDocRoutes)
 // Error handlers
 app.use(get404)
 app.use((error, _req, res, _next) => {
-  console.log(error)
   serverResponse.sendError(res, {
     code: StatusCodes.INTERNAL_SERVER_ERROR,
     success: false,
