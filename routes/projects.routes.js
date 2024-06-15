@@ -8,16 +8,14 @@ import {
   getProjects,
 } from '../controllers/index.js'
 import { param } from 'express-validator'
-import {
-  createProjectDoc,
-  deleteProjectDoc,
-  getProjectDocs,
-} from '../controllers/project-docs.controller.js'
 
 const projectRoutes = express.Router()
 
 projectRoutes.post('/', requireAuth, createProject)
-projectRoutes.get('/', requireAuth, getProjects)
+
+// TODO. validate body of the request
+projectRoutes.post('/all', requireAuth, getProjects)
+
 projectRoutes.get(
   '/:projectId',
   requireAuth,

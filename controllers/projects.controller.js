@@ -36,29 +36,28 @@ export const getProjects = async (req, res, next) => {
   // Search params
   const {
     active,
-    status,
     direction = 'desc',
     sort = 'createdAt',
     searchValue,
-    client,
-    user,
   } = req.query
+
+  const { clients, users, statuses } = req.body
 
   const query = {}
   if (active) {
     query.active = active
   }
 
-  if (status) {
-    query.status = status
+  if (statuses && statuses.length > 0) {
+    query.status = { $in: statuses }
   }
 
-  if (client) {
-    query.client = client
+  if (clients && clients.length > 0) {
+    query.client = { $in: clients }
   }
 
-  if (user) {
-    query.projectTeam = { $in: [user] }
+  if (users && users.length > 0) {
+    query.projectTeam = { $in: users }
   }
 
   if (searchValue && searchValue.length > 3) {
