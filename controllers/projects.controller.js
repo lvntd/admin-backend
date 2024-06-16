@@ -41,7 +41,7 @@ export const getProjects = async (req, res, next) => {
     searchValue,
   } = req.query
 
-  const { clients, users, statuses } = req.body
+  const { clients, users, statuses, startDateRange, endDateRange } = req.body
 
   const query = {}
   if (active) {
@@ -58,6 +58,22 @@ export const getProjects = async (req, res, next) => {
 
   if (users && users.length > 0) {
     query.projectTeam = { $in: users }
+  }
+
+  if (startDateRange) {
+    query.startDate = { $gte: startDateRange.start }
+
+    if (startDateRange.end) {
+      query.startDate = { ...query.startDate, $lte: startDateRange.end }
+    }
+  }
+
+  if (endDateRange) {
+    query.endDate = { $gte: endDateRange.start }
+
+    if (endDateRange.end) {
+      query.endDate = { ...query.endDate, $lte: endDateRange.end }
+    }
   }
 
   if (searchValue && searchValue.length > 3) {
